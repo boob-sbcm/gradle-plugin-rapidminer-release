@@ -23,7 +23,7 @@ class RapidMinerReleasePlugin implements Plugin<Project> {
 	@Override
 	void apply(Project project) {
 		Grgit grgit = Grgit.open(project.file('.'))
-		
+
 		def releaseBranch = grgit.branch.current.name
 
 		RapidMinerReleaseExtension extension = project.extensions.create('release', RapidMinerReleaseExtension)
@@ -61,7 +61,7 @@ class RapidMinerReleasePlugin implements Plugin<Project> {
 		project.tasks.create(name : FINALIZE_TASK_NAME, type: FinalizeReleaseTask){
 			description = 'Finalizes the release by merging changes from release branch back to develop and deletes the release branch (if configured).'
 			group = TASK_GROUP
-			
+
 			grgit = gr
 			releaseBranch = relBranch
 			remote = extension.remote
@@ -79,6 +79,8 @@ class RapidMinerReleasePlugin implements Plugin<Project> {
 			group = TASK_GROUP
 			dependsOn PREPARE_TASK_NAME
 			dependsOn { extension.releaseTasks }
+			extension.releaseTasks.each { task -> task.mustRunAfter PREPARE_TASK_NAME }
+
 			finalizedBy FINALIZE_TASK_NAME
 		}
 	}

@@ -30,7 +30,7 @@ publishing {
 }
 
 release {
-	releaseTasks artifactoryPublish
+	releaseTasks << artifactoryPublish
 }
 
 dependencies {
