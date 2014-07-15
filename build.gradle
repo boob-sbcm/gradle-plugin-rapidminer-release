@@ -5,7 +5,7 @@ apply plugin: 'rapidminer-release'
 buildscript {
 	dependencies {
 		classpath 'com.rapidminer.gradle:publish:0.1.1'
-		classpath 'com.rapidminer.gradle:release:0.1.0-SNAPSHOT'
+		classpath 'com.rapidminer.gradle:release:0.1.1'
 	}
 }
 
