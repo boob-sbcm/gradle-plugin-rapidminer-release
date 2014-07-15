@@ -29,6 +29,10 @@ publishing {
 	}
 }
 
+release {
+	releaseTasks artifactoryPublish
+}
+
 dependencies {
 	compile gradleApi()
 	compile localGroovy()
