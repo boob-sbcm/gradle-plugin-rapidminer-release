@@ -27,10 +27,6 @@ class FinalizeReleaseTask extends DefaultTask {
 
 	@TaskAction
 	def finalizeRelease() {
-		if(!releaseVersion) {
-			throw new IllegalStateException("Release version not set! Finalize release task must run after prepare release task.")
-		}
-		
 		/*
 		 * 1. Switch back to release branch
 		 */
