@@ -5,6 +5,7 @@ apply plugin: 'rapidminer-release'
 buildscript {
 	dependencies {
 		classpath 'com.rapidminer.gradle:publish:0.1.1'
+		classpath 'com.rapidminer.gradle:release:0.1.0-SNAPSHOT'
 	}
 }
 
@@ -24,7 +25,7 @@ publishing {
 	publications {
 		mavenJava(MavenPublication) {
 			from components.java
-			artifactId "code-quality"
+			artifactId "release"
 		}
 	}
 }
