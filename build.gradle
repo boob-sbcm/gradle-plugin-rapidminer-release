@@ -11,5 +11,7 @@ gradlePlugin {
 }
 
 dependencies {
+	// Grgit (https://github.com/ajoberstar/grgit)
+	// Used for Git interaction
 	compile 'org.ajoberstar:grgit:0.2.3'
 }
