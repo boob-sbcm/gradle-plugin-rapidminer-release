@@ -56,36 +56,44 @@ class PrepareReleaseTask extends DefaultTask {
 		def releaseVersion = askForReleaseVersion(gradleProperties.version, console)
 		logger.info("Current branch is: ${releaseBranch}")
 		verifyReleaseInput(console, releaseBranch, releaseVersion)
+		
+		/*
+		 * 5. Change gradle.properties to release version
+		 */
+		logger.info("Changing 'gradle.properties' to new version '${releaseVersion}'.")
+		gradleProperties.version = releaseVersion
+		gradleProperties.store(ReleaseHelper.getGradlePropertiesFile(project).newWriter(), null)
+
+		grgit.add(patterns : [
+			ReleaseHelper.GRADLE_PROPERTIES
+		])
+
+		grgit.commit(message: "Adapt gradle.properties for release of version ${releaseVersion}")
 
 		/*
-		 * 5. Switch to '${masterBranch}'
+		 * 6. Switch to '${masterBranch}'
 		 */
 		logger.info("Switching to '${masterBranch}' branch.")
 		grgit.checkout(branch: masterBranch)
 
 		/*
-		 * 6. Ensuring there aren't any commits in the upstream branch that haven't been merged yet.
+		 * 7. Ensuring there aren't any commits in the upstream branch that haven't been merged yet.
 		 */
 		ensureNoUpstreamChanges()
 
 		/*
-		 * 7. Merge release branch into 'master'
+		 * 8. Merge release branch into 'master'
 		 */
 		logger.info("Merging '${releaseBranch}' to '${masterBranch}' branch.")
 		grgit.merge(head: releaseBranch)
 
 		/*
-		 * 8. Tag master with new version
+		 * 9. Tag master with new version
 		 */
 		if(createTag){
 			logger.info("Creating tag '" + getTagName(releaseVersion) + "' on '${masterBranch}' branch.")
 			grgit.tag.add(name: getTagName(releaseVersion), message: getTagMessage(releaseVersion))
 		}
-		
-		/*
-		 * 9. Set release version on finalizeRelease task
-		 */
-		project.tasks.getByName(RapidMinerReleasePlugin.FINALIZE_TASK_NAME).releaseVersion = releaseVersion
 	}
 
 	/**

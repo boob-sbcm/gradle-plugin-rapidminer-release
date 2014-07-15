@@ -24,7 +24,6 @@ class FinalizeReleaseTask extends DefaultTask {
 	def	pushChangesToRemote
 	def	deleteReleaseBranch
 	def pushTags
-	def releaseVersion
 
 	@TaskAction
 	def finalizeRelease() {
@@ -49,7 +48,7 @@ class FinalizeReleaseTask extends DefaultTask {
 		 */
 		def gradleProperties = ReleaseHelper.getGradleProperties(project)
 		logger.info("Adapting version to next development cycle and committing 'gradle.properties'.")
-		gradleProperties.version = getNextVersion(releaseVersion)
+		gradleProperties.version = getNextVersion(gradleProperties.version)
 		gradleProperties.store(ReleaseHelper.getGradlePropertiesFile(project).newWriter(), null)
 
 		/*
