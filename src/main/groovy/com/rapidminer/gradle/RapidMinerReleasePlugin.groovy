@@ -78,9 +78,10 @@ class RapidMinerReleasePlugin implements Plugin<Project> {
 			description = 'Releases the project by first preparing a release and than invoking the actual release tasks.'
 			group = TASK_GROUP
 			dependsOn PREPARE_TASK_NAME
-			dependsOn { extension.releaseTasks }
-			extension.releaseTasks.each { task -> task.mustRunAfter PREPARE_TASK_NAME }
-
+			extension.releaseTasks.each { task -> 
+				dependsOn task
+				task.dependsOn PREPARE_TASK_NAME 
+			}
 			finalizedBy FINALIZE_TASK_NAME
 		}
 	}
