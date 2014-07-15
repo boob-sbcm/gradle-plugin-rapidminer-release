@@ -1,0 +1,1 @@
+dependencies { compile 'org.ajoberstar:grgit:0.2.3' }

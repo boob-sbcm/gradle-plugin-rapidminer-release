@@ -1,0 +1,3 @@
+## Introduction
+
+The rapidminer-release plugin is designed to ...
