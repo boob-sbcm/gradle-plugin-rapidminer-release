@@ -1,5 +1,8 @@
 ## Change Log
 
+#### 0.1.3
+* Adds preparationTasks property
+
 #### 0.1.2
 * Fixes wrong releaseVersion property check
 

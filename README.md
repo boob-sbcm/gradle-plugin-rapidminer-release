@@ -6,6 +6,7 @@ project's version number.
 
 When invoking the task _release_ with default configuration the following action will be taken:
 * Check for illegal dependencies
+* Execute specified preparation tasks
 * Ask user for release version
 * Adapt 'gradle.properties' to contain the release version
 * Merge changes to master branch
@@ -39,11 +40,17 @@ A more detailed description is given below (see 'Added Tasks')
 		 */
 		remote = 'origin'
 	
-		/*
-		 * Tasks that should be executed after releasePrepare has finished. 
+		/**
+		 * Tasks that should be executed before releasePrepare is started (e.g. code checks, unit tests, etc.).
 		 * Defaults to an empty list.
 		 */
-		releaseTasks << exampleTask1, exampleTask2
+		 preparationTasks << check, test
+	
+		/**
+		 * Tasks that should be executed after releasePrepare has finished (e.g. building of release Jars, upload to Maven repository, etc.).
+		 * Defaults to an empty list.
+		 */
+		releaseTasks << clean, jar, publish
 		
 		/**
 		 * The branch from which releases are created. Default is 'master'.

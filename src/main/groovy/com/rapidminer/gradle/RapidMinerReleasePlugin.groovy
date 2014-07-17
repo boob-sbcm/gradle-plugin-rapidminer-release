@@ -1,8 +1,8 @@
 package com.rapidminer.gradle
 
+import org.ajoberstar.grgit.*
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.ajoberstar.grgit.*
 
 
 
@@ -47,6 +47,7 @@ class RapidMinerReleasePlugin implements Plugin<Project> {
 			if(!extension.skipIllegalDependenciesCheck) {
 				dependsOn CHECK_FOR_ILLEGAL_DEPENDENCIES_NAME
 			}
+			extension.preparationTasks.each { task -> dependsOn task }
 			grgit = gr
 			releaseBranch = currentBranch
 			remote = extension.remote
@@ -78,9 +79,9 @@ class RapidMinerReleasePlugin implements Plugin<Project> {
 			description = 'Releases the project by first preparing a release and than invoking the actual release tasks.'
 			group = TASK_GROUP
 			dependsOn PREPARE_TASK_NAME
-			extension.releaseTasks.each { task -> 
+			extension.releaseTasks.each { task ->
 				dependsOn task
-				task.dependsOn PREPARE_TASK_NAME 
+				task.dependsOn PREPARE_TASK_NAME
 			}
 			finalizedBy FINALIZE_TASK_NAME
 		}

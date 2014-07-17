@@ -18,10 +18,16 @@ class RapidMinerReleaseExtension {
 	String remote = 'origin'
 
 	/**
-	 * Tasks that should be executed after releasePrepare has finished.
+	 * Tasks that should be executed after releasePrepare has finished (e.g. building of release Jars, upload to Maven repository, etc.).
 	 * Defaults to an empty list.
 	 */
 	Iterable releaseTasks = []
+
+	/**
+	 * Tasks that should be executed before releasePrepare is started (e.g. code checks, unit tests, etc.).
+	 * Defaults to an empty list.
+	 */
+	Iterable preparationTasks = []
 
 	/**
 	 * The branch from which releases are created. Default is 'master'.
