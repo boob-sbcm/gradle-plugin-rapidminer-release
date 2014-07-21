@@ -23,11 +23,10 @@ class RapidMinerReleasePlugin implements Plugin<Project> {
 
 	@Override
 	void apply(Project project) {
-		Grgit grgit = Grgit.open(project.file('.'))
-
-		def releaseBranch = grgit.branch.current.name
-
 		RapidMinerReleaseExtension extension = project.extensions.create('release', RapidMinerReleaseExtension)
+		Grgit grgit = Grgit.open(project.file('.'))
+		def String releaseBranch = grgit.branch.current.name
+
 		addFinalizeTask(project, extension, grgit, releaseBranch)
 		addCheckForIllegalDependencies(project, extension)
 		addPrepareTask(project, extension, grgit, releaseBranch)
@@ -42,42 +41,48 @@ class RapidMinerReleasePlugin implements Plugin<Project> {
 	}
 
 	def addPrepareTask(Project project, RapidMinerReleaseExtension extension, Grgit gr, String currentBranch) {
-		def prepareReleaseTask = project.tasks.create(name : PREPARE_TASK_NAME, type: PrepareReleaseTask){
+		def Task prepareReleaseTask = project.tasks.create(name : PREPARE_TASK_NAME, type: PrepareReleaseTask){
 			description = 'Ensures the project is ready to be released.'
 			group = TASK_GROUP
 			grgit = gr
 			releaseBranch = currentBranch
-			remote = extension.remote
-			masterBranch = extension.masterBranch
-			createTag = extension.createTag
-			generateTagName = extension.generateTagName
-			generateTagMessage = extension.generateTagMessage
+		}
+		// Use conventionMapping for lazy initialization of task variables
+		prepareReleaseTask.conventionMapping.with {
+			remote = { extension.remote }
+			masterBranch = { extension.masterBranch }
+			createTag = { extension.createTag }
+			generateTagName = { extension.generateTagName }
+			generateTagMessage = { extension.generateTagMessage }
 		}
 		project.afterEvaluate {
 			if(!extension.skipIllegalDependenciesCheck) {
 				project.logger.info("Adding illegal dependecy check as release preparation task dependecy")
 				prepareReleaseTask.dependsOn CHECK_FOR_ILLEGAL_DEPENDENCIES_NAME
 			}
-			extension.preparationTasks.each { Task task -> 
+			extension.preparationTasks.each { Task task ->
 				project.logger.info("Adding release preparation task dependecy ${task.name}")
-				prepareReleaseTask.dependsOn task 
+				prepareReleaseTask.dependsOn task
 			}
 		}
 	}
 
 	def addFinalizeTask(Project project, RapidMinerReleaseExtension extension, Grgit gr, String relBranch) {
-		project.tasks.create(name : FINALIZE_TASK_NAME, type: FinalizeReleaseTask){
+		def Task finalizeTask = project.tasks.create(name : FINALIZE_TASK_NAME, type: FinalizeReleaseTask){
 			description = 'Finalizes the release by merging changes from release branch back to develop and deletes the release branch (if configured).'
 			group = TASK_GROUP
-
 			grgit = gr
 			releaseBranch = relBranch
-			remote = extension.remote
-			masterBranch = extension.masterBranch
-			mergeToDevelop = extension.mergeToDevelop
-			pushChangesToRemote = extension.pushChangesToRemote
-			deleteReleaseBranch = extension.deleteReleaseBranch
-			pushTags = extension.createTag
+		}
+
+		// use conventionMapping for lazy initialization of variables
+		finalizeTask.conventionMapping.with {
+			remote = { extension.remote }
+			masterBranch = { extension.masterBranch }
+			mergeToDevelop = { extension.mergeToDevelop }
+			pushChangesToRemote = { extension.pushChangesToRemote }
+			deleteReleaseBranch = { extension.deleteReleaseBranch }
+			pushTags = { extension.createTag }
 		}
 	}
 

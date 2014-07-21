@@ -17,13 +17,15 @@ class FinalizeReleaseTask extends DefaultTask {
 	 * The repository to perform the release on.
 	 */
 	def Grgit grgit
-	def releaseBranch
-	def masterBranch
-	def remote
-	def mergeToDevelop
-	def	pushChangesToRemote
-	def	deleteReleaseBranch
-	def pushTags
+	def String releaseBranch
+	
+	// Variables below will be defined by the conventionalMapping
+	def String masterBranch
+	def String remote
+	def boolean mergeToDevelop
+	def	boolean pushChangesToRemote
+	def	boolean deleteReleaseBranch
+	def boolean pushTags
 
 	@TaskAction
 	def finalizeRelease() {
@@ -57,7 +59,7 @@ class FinalizeReleaseTask extends DefaultTask {
 		grgit.commit(message: "Prepare gradle.properties for next development cycle (${gradleProperties.version})")
 
 		// A list of all branches that will be pushed to remote
-		def toPush = [masterBranch]
+		def toPush = [getMasterBranch()]
 
 		// If release branch is not develop, check if changes should be merged back to develop
 		if(mergeBackToDevelop()) {
@@ -76,7 +78,7 @@ class FinalizeReleaseTask extends DefaultTask {
 		/*
 		 * Check if release branch should be deleted
 		 */
-		if(mergeBackToDevelop() && deleteReleaseBranch) {
+		if(mergeBackToDevelop() && isDeleteReleaseBranch()) {
 			def toRemove = [releaseBranch]
 			// also delete branch on remote if available
 			if(trackingReleaseBranch) {
@@ -92,9 +94,9 @@ class FinalizeReleaseTask extends DefaultTask {
 		/*
 		 * Push changes to remote
 		 */
-		if(pushChangesToRemote) {
+		if(isPushChangesToRemote()) {
 			logger.info("Pushing following branches to remote: ${toPush}")
-			grgit.push(remote: remote, refsOrSpecs: toPush, tags: pushTags)
+			grgit.push(remote: getRemote(), refsOrSpecs: toPush, tags: isPushTags())
 		}
 
 	}
@@ -103,7 +105,7 @@ class FinalizeReleaseTask extends DefaultTask {
 	 * @return <code>true</code> if release branch is not develop and {@link #mergeBackToDevelop()} was set to true.
 	 */
 	def boolean mergeBackToDevelop() {
-		return !DEVELOP.equals(releaseBranch) && mergeToDevelop
+		return !DEVELOP.equals(releaseBranch) && isMergeToDevelop()
 	}
 
 	/**

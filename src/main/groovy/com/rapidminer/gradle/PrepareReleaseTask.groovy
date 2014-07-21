@@ -13,17 +13,19 @@ import org.ajoberstar.grgit.*
 class PrepareReleaseTask extends DefaultTask {
 
 	def Grgit grgit
+	def String releaseBranch
+
+	// Variables below will be defined by the conventionalMapping
 	def String remote
 	def String masterBranch
 	def boolean createTag
 	def Closure generateTagName
 	def Closure generateTagMessage
-	def releaseBranch
 
 	@TaskAction
 	def prepareRelease() {
 
-		if(releaseBranch.equals(masterBranch)){
+		if(releaseBranch.equals(getMasterBranch())){
 			throw new RuntimeException("Cannot prepare release. We are on master branch!.")
 		}
 		
@@ -73,8 +75,8 @@ class PrepareReleaseTask extends DefaultTask {
 		/*
 		 * 6. Switch to '${masterBranch}'
 		 */
-		logger.info("Switching to '${masterBranch}' branch.")
-		grgit.checkout(branch: masterBranch)
+		logger.info("Switching to '${getMasterBranch()}' branch.")
+		grgit.checkout(branch: getMasterBranch())
 
 		/*
 		 * 7. Ensuring there aren't any commits in the upstream branch that haven't been merged yet.
@@ -84,14 +86,14 @@ class PrepareReleaseTask extends DefaultTask {
 		/*
 		 * 8. Merge release branch into 'master'
 		 */
-		logger.info("Merging '${releaseBranch}' to '${masterBranch}' branch.")
+		logger.info("Merging '${releaseBranch}' to '${getMasterBranch()}' branch.")
 		grgit.merge(head: releaseBranch)
 
 		/*
 		 * 9. Tag master with new version
 		 */
-		if(createTag){
-			logger.info("Creating tag '" + getTagName(releaseVersion) + "' on '${masterBranch}' branch.")
+		if(isCreateTag()){
+			logger.info("Creating tag '" + getTagName(releaseVersion) + "' on '${getMasterBranch()}' branch.")
 			grgit.tag.add(name: getTagName(releaseVersion), message: getTagMessage(releaseVersion))
 		}
 	}
@@ -151,13 +153,14 @@ class PrepareReleaseTask extends DefaultTask {
 		println "-----------------------------------------------------"
 		println "Current branch: '${releaseBranch}'"
 		println "Version to release: '${releaseVersion}'"
-		println "Actions:"
-		println "* Merge '${releaseBranch}' to '${masterBranch}'"
-		println "* Create tag on '${masterBranch}'"
-		if(createTag){
+		println "Release actions:"
+		println "* Merge '${releaseBranch}' to '${getMasterBranch()}'"
+		if(isCreateTag()){
+			println "* Create tag on '${getMasterBranch()}'"
 			println " - Tag name: '" + getTagName(releaseVersion) + "'"
 			println " - Tag message: '" + getTagMessage(releaseVersion) + "'"
 		}
+		println "Finalize release "
 		println "-----------------------------------------------------"
 		println ""
 
@@ -197,14 +200,14 @@ class PrepareReleaseTask extends DefaultTask {
 	def ensureNoUpstreamChanges(){
 		// Only check for upstream changes only if current branch is tracking a remote branch
 		if(grgit.branch.current.trackingBranch){
-			logger.info('Fetching changes from remote.')
-			grgit.fetch(remote: remote)
+			logger.info('Fetching changes from  (${getRemote()}).')
+			grgit.fetch(remote: getRemote())
 
 			logger.info('Verifying current branch is not behind remote.')
 			def branchStatus = grgit.branch.status(branch: grgit.branch.current.fullName)
 			if (branchStatus.behindCount > 0) {
 				println "Current branch is behind by ${branchStatus.behindCount} commits. Cannot proceed."
-				throw new IllegalStateException("Current branch is behind ${extension.remote}.")
+				throw new IllegalStateException("Current branch is behind ${getRemote()}.")
 			}
 		} else {
 			logger.info("No remote branch for ${grgit.branch.current.name}. Skipping check for upstream changes.")
@@ -215,7 +218,7 @@ class PrepareReleaseTask extends DefaultTask {
 	 * @return the name of the tag that will be created
 	 */
 	def getTagName(String version){
-		return generateTagName(version)
+		return generateTagMessage(version)
 	}
 
 	/**
