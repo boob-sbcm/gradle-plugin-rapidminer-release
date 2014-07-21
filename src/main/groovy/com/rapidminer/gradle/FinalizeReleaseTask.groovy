@@ -54,7 +54,7 @@ class FinalizeReleaseTask extends DefaultTask {
 			ReleaseHelper.GRADLE_PROPERTIES
 		])
 
-		grgit.commit(message: "Preparing next development cycle (${gradleProperties.version})")
+		grgit.commit(message: "Preparing for next development cycle ${gradleProperties.version})")
 
 		// A list of all branches that will be pushed to remote
 		def toPush = [masterBranch]

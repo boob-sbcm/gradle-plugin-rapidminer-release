@@ -68,7 +68,7 @@ class PrepareReleaseTask extends DefaultTask {
 			ReleaseHelper.GRADLE_PROPERTIES
 		])
 
-		grgit.commit(message: "Adapt gradle.properties for release of version ${releaseVersion}")
+		grgit.commit(message: "Prepare gradle.properties for release of version ${releaseVersion}")
 
 		/*
 		 * 6. Switch to '${masterBranch}'
@@ -161,7 +161,7 @@ class PrepareReleaseTask extends DefaultTask {
 		println "-----------------------------------------------------"
 		println ""
 
-		def i = 0;
+		def i = 0
 		while(i++ <= 2){
 			Random random = new Random()
 			int a = random.nextInt(10) + 1
