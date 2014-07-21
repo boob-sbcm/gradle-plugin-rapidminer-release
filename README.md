@@ -44,13 +44,13 @@ A more detailed description is given below (see 'Added Tasks')
 		 * Tasks that should be executed before releasePrepare is started (e.g. code checks, unit tests, etc.).
 		 * Defaults to an empty list.
 		 */
-		 preparationTasks << check, test
+		 preparationTasks << check
 	
 		/**
 		 * Tasks that should be executed after releasePrepare has finished (e.g. building of release Jars, upload to Maven repository, etc.).
 		 * Defaults to an empty list.
 		 */
-		releaseTasks << clean, jar, publish
+		releaseTasks = [clean, jar, publish]
 		
 		/**
 		 * The branch from which releases are created. Default is 'master'.

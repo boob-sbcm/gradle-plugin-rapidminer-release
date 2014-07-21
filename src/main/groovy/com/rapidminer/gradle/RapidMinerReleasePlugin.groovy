@@ -3,6 +3,7 @@ package com.rapidminer.gradle
 import org.ajoberstar.grgit.*
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 
 
 
@@ -41,13 +42,9 @@ class RapidMinerReleasePlugin implements Plugin<Project> {
 	}
 
 	def addPrepareTask(Project project, RapidMinerReleaseExtension extension, Grgit gr, String currentBranch) {
-		project.tasks.create(name : PREPARE_TASK_NAME, type: PrepareReleaseTask){
+		def prepareReleaseTask = project.tasks.create(name : PREPARE_TASK_NAME, type: PrepareReleaseTask){
 			description = 'Ensures the project is ready to be released.'
 			group = TASK_GROUP
-			if(!extension.skipIllegalDependenciesCheck) {
-				dependsOn CHECK_FOR_ILLEGAL_DEPENDENCIES_NAME
-			}
-			extension.preparationTasks.each { task -> dependsOn task }
 			grgit = gr
 			releaseBranch = currentBranch
 			remote = extension.remote
@@ -55,6 +52,16 @@ class RapidMinerReleasePlugin implements Plugin<Project> {
 			createTag = extension.createTag
 			generateTagName = extension.generateTagName
 			generateTagMessage = extension.generateTagMessage
+		}
+		project.afterEvaluate {
+			if(!extension.skipIllegalDependenciesCheck) {
+				project.logger.info("Adding illegal dependecy check as release preparation task dependecy")
+				prepareReleaseTask.dependsOn CHECK_FOR_ILLEGAL_DEPENDENCIES_NAME
+			}
+			extension.preparationTasks.each { Task task -> 
+				project.logger.info("Adding release preparation task dependecy ${task.name}")
+				prepareReleaseTask.dependsOn task 
+			}
 		}
 	}
 
@@ -75,15 +82,18 @@ class RapidMinerReleasePlugin implements Plugin<Project> {
 	}
 
 	def addReleaseTask(Project project, RapidMinerReleaseExtension extension, Grgit grgit) {
-		project.tasks.create(name : RELEASE_TASK_NAME){
+		def releaseTask = project.tasks.create(name : RELEASE_TASK_NAME){
 			description = 'Releases the project by first preparing a release and than invoking the actual release tasks.'
 			group = TASK_GROUP
 			dependsOn PREPARE_TASK_NAME
-			extension.releaseTasks.each { task ->
-				dependsOn task
+			finalizedBy FINALIZE_TASK_NAME
+		}
+		project.afterEvaluate {
+			extension.releaseTasks.each { Task task ->
+				project.logger.info("Adding release task dependecy ${task.name}")
+				releaseTask.dependsOn task
 				task.dependsOn PREPARE_TASK_NAME
 			}
-			finalizedBy FINALIZE_TASK_NAME
 		}
 	}
 }

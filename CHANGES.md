@@ -1,5 +1,8 @@
 ## Change Log
 
+#### 0.1.4
+* Fixes wrong declaration of release preperation and release task dependencies
+
 #### 0.1.3
 * Adds preparationTasks property
 
