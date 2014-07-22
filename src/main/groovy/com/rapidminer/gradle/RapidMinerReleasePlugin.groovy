@@ -97,7 +97,7 @@ class RapidMinerReleasePlugin implements Plugin<Project> {
 			extension.releaseTasks.each { Task task ->
 				project.logger.info("Adding release task dependecy ${task.name}")
 				releaseTask.dependsOn task
-				task.dependsOn PREPARE_TASK_NAME
+				task.mustRunAfter PREPARE_TASK_NAME
 			}
 		}
 	}

@@ -1,5 +1,8 @@
 ## Change Log
 
+#### 0.1.6
+* Release tasks mustRunAfter instead of dependsOn release preparation task
+
 #### 0.1.4
 * Fixes wrong declaration of release preperation and release task dependencies
 
