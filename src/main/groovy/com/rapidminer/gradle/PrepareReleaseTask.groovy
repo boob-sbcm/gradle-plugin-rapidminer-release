@@ -59,6 +59,11 @@ class PrepareReleaseTask extends DefaultTask {
 		logger.info("Current branch is: ${releaseBranch}")
 		verifyReleaseInput(console, releaseBranch, releaseVersion)
 		
+		// Change project version to release version
+		// (Otherwise publishing to e.g. a Maven repository would yield the
+		// wrong version)
+		project.version = releaseVersion
+		
 		/*
 		 * 5. Change gradle.properties to release version
 		 */
