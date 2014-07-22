@@ -218,14 +218,18 @@ class PrepareReleaseTask extends DefaultTask {
 	 * @return the name of the tag that will be created
 	 */
 	def getTagName(String version){
-		return generateTagMessage(version)
+		Closure closure = getGenerateTagName()
+		closure.delegate = this
+		closure(version)
 	}
 
 	/**
 	 * @return the message of the tag that will be created
 	 */
 	def getTagMessage(String version){
-		return generateTagMessage(version)
+		Closure closure = getGenerateTagMessage()
+		closure.delegate = this
+		closure(version)
 	}
 
 }
