@@ -71,4 +71,14 @@ class RapidMinerReleaseExtension {
 	 * Defaults to 'true'.
 	 */
 	boolean deleteReleaseBranch = true
+	
+	/**
+	 * TODO do not compile URL into extension
+	 */
+	String releaseRepositoryUrl = 'https://gitlab.rapid-i.com/artifactory/libs-release-local'
+	
+	/**
+	 * TODO do not compile URL into extension
+	 */
+	String snapshotRepositoryUrl = 'https://gitlab.rapid-i.com/artifactory/libs-snapshot-local'
 }
