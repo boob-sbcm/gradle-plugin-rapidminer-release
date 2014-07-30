@@ -1,10 +1,10 @@
 ## Introduction
 
-The 'rapidminer-release' plugin is designed to ease the process of creating a project release on Git.
-It assumes a that the 'gradle.properties' file in the root project of the applied project contains the 
+The 'rapidminer-release' plugin is designed to ease the process of creating a project release that is managed via Git.
+It assumes a that the 'gradle.properties' file in the root project of the applied project contains the current
 project's version number.
 
-When invoking the task _release_ with default configuration the following action will be taken:
+When invoking the task _release_ with default configuration the following action will be executed:
 * Check for illegal dependencies
 * Execute specified preparation tasks
 * Ask user for release version

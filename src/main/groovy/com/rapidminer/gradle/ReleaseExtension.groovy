@@ -1,11 +1,9 @@
 package com.rapidminer.gradle
 
 /**
- *
- * @author nwoehler
- *
+ * @author Nils Woehler
  */
-class RapidMinerReleaseExtension {
+class ReleaseExtension {
 
 	/**
 	 * Specifies whether to skip the check for illegal release dependencies. Defaults to 'false'.
@@ -63,7 +61,7 @@ class RapidMinerReleaseExtension {
 	/**
 	 * Specifies whether to push all changes to the specified remote repository. Defaults to 'true'.
 	 */
-	boolean pushChangesToRemote = true
+	boolean pushToRemote = true
 
 	/**
 	 * Specifies whether to delete release branch after merging changes to master branch.

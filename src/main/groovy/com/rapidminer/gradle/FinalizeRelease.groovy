@@ -5,38 +5,38 @@ import org.gradle.api.tasks.TaskAction
 import org.ajoberstar.grgit.*
 
 /**
+ * The finalize release task is called if 'releasePrepare' has been called before.
+ * This means we are performing a local release where the release branch changes will be merged
+ * back to develop.
  *
  * @author Nils Woehler
  *
  */
-class FinalizeReleaseTask extends DefaultTask {
+class FinalizeRelease extends DefaultTask {
 
 	protected static final String DEVELOP = "develop"
 
-	/**
-	 * The repository to perform the release on.
-	 */
-	def Grgit grgit
+	def GitScmProvider scmProvider
 	def String releaseBranch
-	
+
 	// Variables below will be defined by the conventionalMapping
-	def String masterBranch
 	def String remote
 	def boolean mergeToDevelop
-	def	boolean pushChangesToRemote
+	def	boolean pushToRemote
 	def	boolean deleteReleaseBranch
 	def boolean pushTags
+	def boolean createTag
 
 	@TaskAction
 	def finalizeRelease() {
+
 		/*
 		 * 1. Switch back to release branch
 		 */
-		logger.info("Switching back to to '${releaseBranch}' branch.")
-		grgit.checkout(branch: releaseBranch)
+		scmProvider.switchToBranch(releaseBranch)
 
 		// remember the remote release branch
-		def trackingReleaseBranch = grgit.branch.current.trackingBranch
+		def trackingReleaseBranch = scmProvider.currentTrackingBranch
 		if(trackingReleaseBranch) {
 			logger.info("Release branch is tracking branch ${trackingReleaseBranch.fullName}")
 		}
@@ -52,14 +52,11 @@ class FinalizeReleaseTask extends DefaultTask {
 		/*
 		 * 3. Add and commit changed gradle.properties
 		 */
-		grgit.add(patterns : [
-			ReleaseHelper.GRADLE_PROPERTIES
-		])
-
-		grgit.commit(message: "Prepare gradle.properties for next development cycle (${gradleProperties.version})")
+		scmProvider.commit("Prepare gradle.properties for next development cycle (${gradleProperties.version})", [
+			ReleaseHelper.GRADLE_PROPERTIES] as List)
 
 		// A list of all branches that will be pushed to remote
-		def toPush = [getMasterBranch()]
+		def toPush = []
 
 		// If release branch is not develop, check if changes should be merged back to develop
 		if(mergeBackToDevelop()) {
@@ -67,25 +64,28 @@ class FinalizeReleaseTask extends DefaultTask {
 			toPush << DEVELOP
 
 			logger.info("Switching to 'develop' branch.")
-			grgit.checkout(branch: DEVELOP, createBranch: false)
+			scmProvider.switchToBranch(DEVELOP)
 
 			logger.info("Merging '${releaseBranch}' branch to 'develop' branch.")
-			grgit.merge(head: releaseBranch)
+			scmProvider.merge(releaseBranch)
 		} else {
 			logger.info("Will not merge back changes to develop. Either because we are on develop or because it has been disabled.")
 		}
-		
+
 		/*
-		 * Check if release branch should be deleted
+		 * Check if release branch should be deleted.
+		 * 
+		 * The deletion can only be done if changes should be merged back to develop
+		 * and the release branch itself is not develop.
 		 */
-		if(mergeBackToDevelop() && isDeleteReleaseBranch()) {
+		if(isDeleteReleaseBranch() && mergeBackToDevelop()) {
 			def toRemove = [releaseBranch]
 			// also delete branch on remote if available
 			if(trackingReleaseBranch) {
 				toRemove << trackingReleaseBranch.fullName
 			}
 			logger.info("Deleting release branches ${toRemove}.")
-			grgit.branch.remove(names: toRemove)
+			scmProvider.remove(toRemove)
 		} else {
 			// release branch should not be deleted and might even be develop -> push it to remote
 			toPush << releaseBranch
@@ -94,9 +94,9 @@ class FinalizeReleaseTask extends DefaultTask {
 		/*
 		 * Push changes to remote
 		 */
-		if(isPushChangesToRemote()) {
+		if(isPushToRemote()) {
 			logger.info("Pushing following branches to remote: ${toPush}")
-			grgit.push(remote: getRemote(), refsOrSpecs: toPush, tags: isPushTags())
+			scmProvider.push(toPush, false)
 		}
 
 	}

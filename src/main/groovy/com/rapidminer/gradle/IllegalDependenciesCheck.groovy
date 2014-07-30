@@ -1,16 +1,17 @@
 package com.rapidminer.gradle
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 
 
 /**
- * A task that checks whether any project specifies a SNAPSHOT dependency in any configuration.
+ * A task that checks whether any project specifies an illegal (e.g. SNAPSHOT) dependency in any configuration.
  *
  * @author Nils Woehler
  *
  */
-class CheckForIllegalDependenciesTask extends DefaultTask {
+class IllegalDependenciesCheck extends DefaultTask {
 
 	/**
 	 * Checks whether the project specifies any snapshot dependencies.
@@ -30,9 +31,9 @@ class CheckForIllegalDependenciesTask extends DefaultTask {
 			}
 		}
 		if(illegalDependencies.size() != 0) {
-			println "Project depends on following illegal release dependencies: "
-			illegalDependencies.each { found -> println "  Project: '${found.project}', Configuration: '${found.conf}', Artefact: '${found.dependency.group}:${found.dependency.name}:${found.dependency.version}'" }
-			throw new IllegalStateException("Project depends on dependencies that are forbidden in a release version!")
+			ReleaseHelper.println "Project depends on following illegal release dependencies: "
+			illegalDependencies.each { found -> ReleaseHelper.println "  Project: '${found.project}', Configuration: '${found.conf}', Artefact: '${found.dependency.group}:${found.dependency.name}:${found.dependency.version}'" }
+			throw new GradleException("Project depends on dependencies that are forbidden in a release version!")
 		}
 	}
 	
