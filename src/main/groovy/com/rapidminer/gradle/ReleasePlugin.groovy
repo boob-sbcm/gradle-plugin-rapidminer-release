@@ -158,7 +158,6 @@ class ReleasePlugin implements Plugin<Project> {
 		// use conventionMapping for lazy initialization of variables
 		finalizeTask.conventionMapping.with {
 			remote = { extension.remote }
-			masterBranch = { extension.masterBranch }
 			mergeToDevelop = { extension.mergeToDevelop }
 			pushToRemote = { extension.pushToRemote }
 			deleteReleaseBranch = { extension.deleteReleaseBranch }
@@ -173,7 +172,7 @@ class ReleasePlugin implements Plugin<Project> {
 			withReleaseFinalize = Boolean.valueOf(project.properties[ReleaseHelper.PROPERTY_RELEASE_FINALIZE])
 		}
 		if(withReleaseFinalize) {
-			gradle.taskGraph.whenReady {taskGraph ->
+			project.gradle.taskGraph.whenReady {taskGraph ->
 				if(taskGraph.hasTask(PREPARE_RELEASE_TASK_NAME)) {
 					releaseTask.finalizedBy finalizeTask
 				}

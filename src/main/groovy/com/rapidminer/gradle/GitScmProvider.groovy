@@ -18,7 +18,7 @@ class GitScmProvider {
 	private final Logger logger
 	private final ReleaseExtension ext
 	
-	protected GitScmProvider(String rootDirPath, Logger logger, ReleaseExtension ext) {
+	protected GitScmProvider(File rootDirPath, Logger logger, ReleaseExtension ext) {
 		this.repo = Grgit.open(rootDirPath)
 		this.logger = logger
 		this.ext = ext

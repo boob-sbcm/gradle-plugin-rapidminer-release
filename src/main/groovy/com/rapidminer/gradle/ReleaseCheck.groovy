@@ -14,7 +14,7 @@ import org.gradle.api.tasks.TaskAction
  */
 class ReleaseCheck extends DefaultTask {
 
-	private GitScmProvider scmProvider
+	def GitScmProvider scmProvider
 	
 	// Variables below will be defined by the conventionalMapping
 	def String masterBranch
