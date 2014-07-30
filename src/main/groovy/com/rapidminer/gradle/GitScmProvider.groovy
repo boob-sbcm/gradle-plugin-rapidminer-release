@@ -1,6 +1,7 @@
 package com.rapidminer.gradle
 
 import org.ajoberstar.grgit.Grgit
+import org.ajoberstar.grgit.Tag
 import org.gradle.api.GradleException
 import org.gradle.api.logging.Logger
 
@@ -139,7 +140,12 @@ class GitScmProvider {
 	 * Ensures that the current commit is not already a tag.
 	 */
 	def ensureNoTag() {
-		//TODO
+		def currentCommit = grgit.log(maxCommits: 1)[0]
+		
+		// fetch all tags
+		def isTag = repo.tag.list.any { Tag tag ->
+			return tag.commit == currentCommit
+		}
 	}
 	
 	/**
