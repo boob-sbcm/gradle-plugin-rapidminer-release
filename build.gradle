@@ -1,6 +1,6 @@
 buildscript {
 	dependencies {
-		classpath 'com.rapidminer.gradle:gradle-plugin:0.1.2'
+		classpath 'com.rapidminer.gradle:gradle-plugin:0.2.4-SNAPSHOT'
 	}
 }
 
@@ -14,4 +14,14 @@ dependencies {
 	// Grgit (https://github.com/ajoberstar/grgit)
 	// Used for Git interaction
 	compile 'org.ajoberstar:grgit:0.2.3'
+	
+	// testing
+	testCompile 'junit:junit:4.11'
+	testCompile('org.spockframework:spock-core:0.7-groovy-2.0') { exclude group: 'org.codehaus.groovy' }
+	
+	// Adds TemoDirectory annotation
+	testCompile('com.energizedwork:spock-extensions:1.0')  { 
+		exclude group: 'org.codehaus.groovy' 
+		exclude group: 'org.spockframework'
+	}
 }
