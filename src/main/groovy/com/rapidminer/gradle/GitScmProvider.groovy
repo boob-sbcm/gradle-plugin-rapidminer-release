@@ -13,31 +13,31 @@ import org.gradle.api.logging.Logger
  *
  */
 class GitScmProvider {
-	
+
 	private final Grgit repo
 	private final Logger logger
 	private final ReleaseExtension ext
-	
+
 	protected GitScmProvider(File rootDirPath, Logger logger, ReleaseExtension ext) {
 		this.repo = Grgit.open(rootDirPath)
 		this.logger = logger
 		this.ext = ext
 	}
-	
+
 	/**
 	 * @return the name of the current branch
 	 */
 	def String getCurrentBranch() {
 		return repo.branch.current.name
 	}
-	
+
 	/**
 	 * @return the tracked remote branch of the current branch
 	 */
 	def getCurrentTrackingBranch() {
 		return grgit.branch.current.trackingBranch
 	}
-	
+
 	/**
 	 * 
 	 * @param message
@@ -50,7 +50,7 @@ class GitScmProvider {
 			repo.commit(message: message)
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param branch
@@ -61,7 +61,7 @@ class GitScmProvider {
 			repo.checkout(branch: branch, createBranch: false)
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param branchToMerge
@@ -72,7 +72,7 @@ class GitScmProvider {
 			repo.merge(head: branchToMerge)
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param remote
@@ -85,7 +85,7 @@ class GitScmProvider {
 			repo.push(remote: ext.remote, refsOrSpecs: refs, tags: tags)
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param tagname
@@ -96,7 +96,7 @@ class GitScmProvider {
 			repo.tag.add(name: tagname, message: message ?: "Creating ${tagname}", annotate: true)
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param toDelete
@@ -105,7 +105,7 @@ class GitScmProvider {
 	def remove(toRemove) {
 		repo.branch.remove(names: toRemove)
 	}
-	
+
 	/**
 	 * Checks whether there are uncommitted changes in the Git repository.
 	 */
@@ -135,19 +135,33 @@ class GitScmProvider {
 			logger.info("No remote branch for ${repo.branch.current.name}. Skipping check for upstream changes.")
 		}
 	}
-	
+
 	/**
 	 * Ensures that the current commit is not already a tag.
 	 */
-	def ensureNoTag() {
-		def currentCommit = grgit.log(maxCommits: 1)[0]
-		
+	def ensureNoTag(String tagName) {
+		def currentCommit = repo.log(maxCommits: 1)[0]
+
 		// fetch all tags
-		def isTag = repo.tag.list.any { Tag tag ->
-			return tag.commit == currentCommit
+		def reason = null
+		def tag = repo.tag.list().find { Tag tag ->
+			if(tag.commit.id.equals(currentCommit.id)) {
+				reason = "Current commit is tag '${tag.name}'!"
+				return true
+			}
+			if(tag.name.equals(tagName)) {
+				reason ="Tag with name '${tagName}' already exists!"
+				return true
+			}
+			return false
 		}
+
+		if(tag) {
+			throw new GradleException("Cannot create new release. ${reason}")
+		}
+
 	}
-	
+
 	/**
 	 * @param successMessage the message that should be logged in success
 	 * @param command the command to be executed
