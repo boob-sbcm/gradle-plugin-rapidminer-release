@@ -20,9 +20,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 
-import spock.lang.Specification
-
-import com.energizedwork.spock.extensions.TempDirectory
+import com.rapidminer.gradle.GitSpecification.RepoType
 
 /**
  * A test specification for the {@link GitScmProvider} class.
@@ -30,25 +28,7 @@ import com.energizedwork.spock.extensions.TempDirectory
  * @author Nils Woehler
  *
  */
-class TestGitScmProvider extends Specification {
-
-	private static final String FILE_1 = '1.txt'
-	private static final String FILE_2 = '2.txt'
-	private static final String BRANCH_1 = 'test-branch-1'
-	private static final String BRANCH_2 = 'test-branch-2'
-	
-	private enum Type {
-		LOCAL,
-		REMOTE
-	}
-	
-	@TempDirectory(baseDir='target/test/tmp/', clean=true)
-	File localRepoDir
-	Grgit grgitLocal
-	
-	@TempDirectory(baseDir='target/test/tmp/', clean=true)
-	File remoteRepoDir
-	Grgit grgitRemote
+class TestGitScmProvider extends GitSpecification {
 
 	Project project
 	ReleaseExtension ext
@@ -58,26 +38,17 @@ class TestGitScmProvider extends Specification {
 	 * Use Spock's setup() hook to initialize the properties for each test.
 	 */
 	def setup() {
-		// Create the remote repository
-		grgitRemote = Grgit.init(dir: remoteRepoDir)
-		addContent(Type.REMOTE, FILE_1)
-		grgitRemote.add(patterns: [FILE_1])
-		grgitRemote.commit(message: 'Initial commit')
-		
-		// Create local repository by cloning the remote repository
-		grgitLocal = Grgit.clone(dir: localRepoDir, uri: remoteRepoDir)
-		
 		project = ProjectBuilder.builder().build()
 		ext = new ReleaseExtension()
 		scmProvider = new GitScmProvider(localRepoDir, project.logger, ext)
 	}
 
-	def "switchToBranch: switched branch"() {
+	def 'switchToBranch: switched branch'() {
 		given:
-		commit(Type.LOCAL)
+		commit(RepoType.LOCAL)
 		grgitLocal.branch.add(name: BRANCH_1)
-		commit(Type.LOCAL)
-		commit(Type.LOCAL)
+		commit(RepoType.LOCAL)
+		commit(RepoType.LOCAL)
 		grgitLocal.branch.add(name: BRANCH_2)
 		
 		when:
@@ -91,11 +62,11 @@ class TestGitScmProvider extends Specification {
 		scmProvider.currentBranch == BRANCH_2
 	}
 	
-	def "commit: all committed"() {
+	def 'commit: all committed'() {
 		given:
-		commit(Type.LOCAL)
-		commit(Type.LOCAL)
-		addContent(Type.LOCAL)
+		commit(RepoType.LOCAL)
+		commit(RepoType.LOCAL)
+		addContent(RepoType.LOCAL)
 		
 		when:
 		scmProvider.ensureNoUncommittedChanges()
@@ -109,10 +80,10 @@ class TestGitScmProvider extends Specification {
 		GradleException e1 = notThrown()
 	}
 	
-	def "push: push changes"() {
+	def 'push: push changes'() {
 		given:
 		ext.remote = 'origin'
-		commit(Type.LOCAL)
+		commit(RepoType.LOCAL)
 		def localContent =  new File(localRepoDir.absolutePath, FILE_1).text
 		
 		when:
@@ -122,23 +93,23 @@ class TestGitScmProvider extends Specification {
 		localContent ==  new File(localRepoDir.absolutePath, FILE_1).text
 	}
 	
-	def "merge: all merged"() {
+	def 'merge: all merged'() {
 		given:
-		commit(Type.LOCAL)
+		commit(RepoType.LOCAL)
 		// Create two branches
 		grgitLocal.branch.add(name: BRANCH_1)
 		grgitLocal.branch.add(name: BRANCH_2)
 		
 		// Commit content to first branch
 		scmProvider.switchToBranch(BRANCH_1)
-		commit(Type.LOCAL, FILE_1)
-		commit(Type.LOCAL, FILE_1)
+		commit(RepoType.LOCAL, FILE_1)
+		commit(RepoType.LOCAL, FILE_1)
 		def contentBranch1 = new File(localRepoDir.absolutePath, FILE_1).text
 		
 		// commit content to second branch
 		scmProvider.switchToBranch(BRANCH_2)
-		commit(Type.LOCAL, FILE_2)
-		commit(Type.LOCAL, FILE_2)
+		commit(RepoType.LOCAL, FILE_2)
+		commit(RepoType.LOCAL, FILE_2)
 		def contentBranch2 = new File(localRepoDir.absolutePath, FILE_2).text
 		
 		
@@ -153,10 +124,10 @@ class TestGitScmProvider extends Specification {
 	}
 	
 	
-	def "ensureNoUncommittedChanges: changes found"() {
+	def 'ensureNoUncommittedChanges: changes found'() {
 		given:
-		commit(Type.LOCAL)
-		addContent(Type.LOCAL)
+		commit(RepoType.LOCAL)
+		addContent(RepoType.LOCAL)
 		
 		when:
 		scmProvider.ensureNoUncommittedChanges()
@@ -166,9 +137,9 @@ class TestGitScmProvider extends Specification {
 		e.message == 'Git repository has uncommitted changes.'
 	}
 	
-	def "ensureNoUncommittedChanges: all okay"() {
+	def 'ensureNoUncommittedChanges: all okay'() {
 		given:
-		commit(Type.LOCAL)
+		commit(RepoType.LOCAL)
 		
 		when:
 		scmProvider.ensureNoUncommittedChanges()
@@ -177,9 +148,9 @@ class TestGitScmProvider extends Specification {
 		GradleException e = notThrown()
 	}
 	
-	def "ensureNoUpstreamChanges: no upstream changes"() {
+	def 'ensureNoUpstreamChanges: no upstream changes'() {
 		given:
-		commit(Type.LOCAL)
+		commit(RepoType.LOCAL)
 		
 		when:
 		scmProvider.ensureNoUpstreamChanges()
@@ -188,9 +159,9 @@ class TestGitScmProvider extends Specification {
 		GradleException e = notThrown()
 	}
 	
-	def "ensureNoUpstreamChanges: upstream changes"() {
+	def 'ensureNoUpstreamChanges: upstream changes'() {
 		given:
-		commit(Type.REMOTE)
+		commit(RepoType.REMOTE)
 		
 		when:
 		scmProvider.ensureNoUpstreamChanges()
@@ -199,11 +170,11 @@ class TestGitScmProvider extends Specification {
 		GradleException e = thrown()
 	}
 
-	def "ensureNoTag: tag already exist"() {
+	def 'ensureNoTag: tag already exist'() {
 		given:
-		commit(Type.LOCAL)
+		commit(RepoType.LOCAL)
 		grgitLocal.tag.add(name: '1.0.000')
-		commit(Type.LOCAL)
+		commit(RepoType.LOCAL)
 
 		when:
 		scmProvider.ensureNoTag('1.0.000')
@@ -213,9 +184,9 @@ class TestGitScmProvider extends Specification {
 		e.message.contains('Tag with name')
 	}
 
-	def "ensureNoTag: commit is tag"() {
+	def 'ensureNoTag: commit is tag'() {
 		given:
-		commit(Type.LOCAL)
+		commit(RepoType.LOCAL)
 		grgitLocal.tag.add(name: '1.0.000')
 
 		when:
@@ -226,11 +197,11 @@ class TestGitScmProvider extends Specification {
 		e.message.contains('Current commit is tag')
 	}
 
-	def "ensureNoTag: all okay"() {
+	def 'ensureNoTag: all okay'() {
 		given:
-		commit(Type.LOCAL)
+		commit(RepoType.LOCAL)
 		grgitLocal.tag.add(name: '1.0.000')
-		commit(Type.LOCAL)
+		commit(RepoType.LOCAL)
 
 		when:
 		scmProvider.ensureNoTag('1.0.001')
@@ -239,30 +210,4 @@ class TestGitScmProvider extends Specification {
 		GradleException e = notThrown()
 	}
 
-	private void addContent(Type type, String fileName) {
-		String path = remoteRepoDir.absolutePath
-		if(type == Type.LOCAL) {
-			path = localRepoDir.absolutePath
-		}
-		new File(path, fileName) << UUID.randomUUID().toString() + File.separator
-	}
-	
-	private void addContent(Type type) {
-		addContent(type, FILE_1)
-	}
-	
-	private void commit(Type type, String fileName) {
-		addContent(type, fileName)
-		def Grgit grgit = grgitRemote
-		if(type == Type.LOCAL) {
-			grgit = grgitLocal
-		}
-		grgit.add(patterns: [fileName])
-		grgit.commit(message: 'do')
-	}
-	
-	private void commit(Type type) {
-		commit(type, FILE_1)
-	}
-	
 }
