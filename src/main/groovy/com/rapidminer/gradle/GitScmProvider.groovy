@@ -96,7 +96,7 @@ class GitScmProvider {
 	 * @return
 	 */
 	def push(List<String> refs, boolean tags) {
-		grgitCommand("Pushed ${refs} to remote repository '${remote}'") {
+		grgitCommand("Pushed ${refs} to remote repository '${ext.remote}'") {
 			repo.push(remote: ext.remote, refsOrSpecs: refs, tags: tags)
 		}
 	}
