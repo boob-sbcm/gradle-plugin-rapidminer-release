@@ -64,6 +64,7 @@ class ReleasePlugin implements Plugin<Project> {
 		prepareReleaseTask.conventionMapping.with {
 			masterBranch = { extension.masterBranch }
 			pushToRemote = { extension.pushToRemote }
+			generateTagName = { extension.generateTagName }
 		}
 
 		// Create and configure Maven artifact refresh task
@@ -109,6 +110,7 @@ class ReleasePlugin implements Plugin<Project> {
 		releaseCheckTask.scmProvider = gitProvider
 		releaseCheckTask.conventionMapping.with {
 			masterBranch = { extension.masterBranch }
+			generateTagName = { extension.generateTagName }
 		}
 
 		// Gather release task dependencies

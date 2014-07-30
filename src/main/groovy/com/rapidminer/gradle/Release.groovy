@@ -25,28 +25,13 @@ class Release extends DefaultTask {
 	@TaskAction
 	def tagRelease() {
 		if(isCreateTag()){
-			scmProvider.tag(getTagName(project.version), getTagMessage(project.version))
+			def tagName = ReleaseHelper.execClosure(project.version, getGenerateTagName())
+			def tagMessage = ReleaseHelper.execClosure(project.version, getGenerateTagMessage())
+			scmProvider.tag(tagName, tagMessage)
 			if(isPushToRemote()) {
 				scmProvider.push([scmProvider.currentBranch] as List, true)
 			}
 		}
 	}
 
-	/**
-	 * @return the name of the tag that will be created
-	 */
-	def getTagName(String version){
-		Closure closure = getGenerateTagName()
-		closure.delegate = this
-		closure(version)
-	}
-
-	/**
-	 * @return the message of the tag that will be created
-	 */
-	def getTagMessage(String version){
-		Closure closure = getGenerateTagMessage()
-		closure.delegate = this
-		closure(version)
-	}
 }

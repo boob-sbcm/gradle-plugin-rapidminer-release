@@ -93,4 +93,12 @@ class ReleaseHelper {
 		println "$_message (WAITING FOR INPUT BELOW)"
 		return System.in.newReader().readLine() ?: defaultValue
 	}
+	
+	/**
+	 * @return the result of the provided closure
+	 */
+	public static final execClosure(String version, Closure closure){
+		closure.delegate = this
+		closure(version)
+	}
 }

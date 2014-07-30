@@ -20,6 +20,7 @@ class PrepareRelease extends DefaultTask {
 	// Variables below will be defined by the conventionalMapping
 	def String masterBranch
 	def	boolean pushToRemote
+	def Closure generateTagName
 
 	@TaskAction
 	def prepareRelease() {
@@ -102,6 +103,11 @@ class PrepareRelease extends DefaultTask {
 		 * 8. Ensuring there aren't any commits in the upstream branch that haven't been merged yet.
 		 */
 		scmProvider.ensureNoUpstreamChanges()
+		
+		/*
+		 * 8a. Ensure the current version isn't already tagged
+		 */
+		scmProvider.ensureNoTag(ReleaseHelper.execClosure(project.version, getGenerateTagName()))
 
 		/*
 		 * 9. Merge release branch into 'master'

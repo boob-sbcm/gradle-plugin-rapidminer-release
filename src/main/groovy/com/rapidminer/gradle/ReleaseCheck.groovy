@@ -1,5 +1,7 @@
 package com.rapidminer.gradle
 
+import groovy.lang.Closure;
+
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
@@ -16,6 +18,7 @@ class ReleaseCheck extends DefaultTask {
 	def GitScmProvider scmProvider
 	
 	// Variables below will be defined by the conventionalMapping
+	def Closure generateTagName
 	def String masterBranch
 
 	@TaskAction
@@ -33,6 +36,6 @@ class ReleaseCheck extends DefaultTask {
 		scmProvider.ensureNoUncommittedChanges()
 		
 		// Ensure the current commit isn't already a tag
-		scmProvider.ensureNoTag()
+		scmProvider.ensureNoTag(ReleaseHelper.execClosure(project.version, getGenerateTagName()))
 	}
 }
