@@ -4,7 +4,6 @@ import groovy.lang.Closure;
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-import org.ajoberstar.grgit.*
 
 /**
  * The release task is performed after all other release tasks (e.g. build, publish, etc.)

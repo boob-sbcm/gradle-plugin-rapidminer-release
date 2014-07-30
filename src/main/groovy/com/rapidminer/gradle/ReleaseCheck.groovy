@@ -1,6 +1,5 @@
 package com.rapidminer.gradle
 
-import org.ajoberstar.grgit.*
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
@@ -23,8 +22,8 @@ class ReleaseCheck extends DefaultTask {
 	def performChecks() {
 		
 		// Check if current branch is the defined master branch
-		if(scmProvider.currentBranch.equals(getMasterBranch())) {
-			throw new GradleException("Release task was not executed on defined master branch '${getMasterBranch}' but on ${scmProvider.currentBranch}")
+		if(!scmProvider.currentBranch.equals(getMasterBranch())) {
+			throw new GradleException("Release task was not executed on defined master branch '${getMasterBranch()}' but on '${scmProvider.currentBranch}'")
 		}
 		
 		// Check for upstream changes

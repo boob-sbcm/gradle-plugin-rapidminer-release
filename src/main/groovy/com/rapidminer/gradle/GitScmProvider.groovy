@@ -2,7 +2,6 @@ package com.rapidminer.gradle
 
 import org.ajoberstar.grgit.Grgit
 import org.gradle.api.GradleException
-import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 
 /**
@@ -111,7 +110,7 @@ class GitScmProvider {
 	 */
 	def ensureNoUncommittedChanges() {
 		logger.info('Checking for uncommitted changes in Git repository.')
-		if(!repo.status.clean) {
+		if(!repo.status().clean) {
 			throw new GradleException('Git repository has uncommitted changes.')
 		}
 	}

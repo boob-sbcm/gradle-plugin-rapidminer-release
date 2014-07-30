@@ -1,11 +1,8 @@
 package com.rapidminer.gradle
 
-import org.ajoberstar.grgit.*
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-
-
 
 /**
  * The RapidMiner release plugin provides tasks to ease the process of create a project release
