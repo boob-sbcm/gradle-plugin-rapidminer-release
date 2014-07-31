@@ -22,7 +22,8 @@ import org.ajoberstar.grgit.Grgit
 import org.gradle.api.GradleException
 
 /**
- * A integration test specification for the {@link ReleasePlugin} class.
+ * A integration test specification for the {@link ReleaseCheck} class
+ * and the 'releaseCheckDependencies' task.
  * 
  * @author Nils Woehler
  *
@@ -60,7 +61,7 @@ class ReleaseCheckDependenciesTest extends IntegrationSpec {
         '''.stripIndent()
 		
 		when:
-		ExecutionResult result = runTasks('releaseCheckDependencies')
+		ExecutionResult result = runTasksSuccessfully('releaseCheckDependencies')
 		
 		then:
 		result.failure == null
@@ -78,7 +79,7 @@ class ReleaseCheckDependenciesTest extends IntegrationSpec {
         '''.stripIndent()
 		
 		when:
-		ExecutionResult result = runTasks('releaseCheckDependencies')
+		ExecutionResult result = runTasksWithFailure('releaseCheckDependencies')
 		
 		then:
 		result.failure != null
@@ -96,7 +97,7 @@ class ReleaseCheckDependenciesTest extends IntegrationSpec {
         '''.stripIndent()
 		
 		when:
-		ExecutionResult result = runTasks('releaseCheckDependencies')
+		ExecutionResult result = runTasksWithFailure('releaseCheckDependencies')
 		
 		then:
 		result.failure != null
