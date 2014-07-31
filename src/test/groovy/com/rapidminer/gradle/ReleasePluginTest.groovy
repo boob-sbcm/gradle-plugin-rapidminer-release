@@ -25,13 +25,9 @@ import org.gradle.testfixtures.ProjectBuilder
  * @author Nils Woehler
  *
  */
-class TestReleasePlugin extends GitSpecification {
+class ReleasePluginTest extends GitSpecification {
 
-	private static final String TEST_TXT = 'test.txt'
-	
 	Project project
-	ReleaseExtension ext
-	GitScmProvider scmProvider
 
 	/*
 	 * Use Spock's setup() hook to initialize the properties for each test.
@@ -39,17 +35,6 @@ class TestReleasePlugin extends GitSpecification {
 	def setup() {
 		project = ProjectBuilder.builder().withName('releasePluginTest').withProjectDir(localRepoDir).build()
 		project.apply plugin: ReleasePlugin
-
-		// Write current version into gradle.properties
-		def props = project.file(ReleaseHelper.GRADLE_PROPERTIES)
-		props.withWriter { it << "version=${project.version}" }
-
-		// Write test file
-		project.file(TEST_TXT).withWriter {it << 'test'}
-
-		// Commit added files
-		grgitLocal.add(patterns: [ReleaseHelper.GRADLE_PROPERTIES, TEST_TXT] as List)
-		grgitLocal.commit(message: 'Adds gradle.properties and test file')
 	}
 
 	// TODO add more test cases
@@ -58,6 +43,36 @@ class TestReleasePlugin extends GitSpecification {
 	def 'should apply ReleasePlugin plugin'() {
 		expect:
 		project.plugins.findPlugin(ReleasePlugin)
+	}
+	
+	def 'has release task'() {
+		expect:
+		project.tasks.findByPath(':release')
+	}
+	
+	def 'has releaseFinalize task'() {
+		expect:
+		project.tasks.findByPath(':releaseFinalize')
+	}
+	
+	def 'has releaseCheck task'() {
+		expect:
+		project.tasks.findByPath(':releaseCheck')
+	}
+	
+	def 'has releaseCheckDependencies task'() {
+		expect:
+		project.tasks.findByPath(':releaseCheckDependencies')
+	}
+	
+	def 'has releasePrepare task'() {
+		expect:
+		project.tasks.findByPath(':releasePrepare')
+	}
+	
+	def 'has releaseRefreshArtifacts task'() {
+		expect:
+		project.tasks.findByPath(':releaseRefreshArtifacts')
 	}
 
 }

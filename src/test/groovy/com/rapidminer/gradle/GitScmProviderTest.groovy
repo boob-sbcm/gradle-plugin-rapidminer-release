@@ -28,7 +28,7 @@ import com.rapidminer.gradle.GitSpecification.RepoType
  * @author Nils Woehler
  *
  */
-class TestGitScmProvider extends GitSpecification {
+class GitScmProviderTest extends GitSpecification {
 
 	Project project
 	ReleaseExtension ext
@@ -41,6 +41,10 @@ class TestGitScmProvider extends GitSpecification {
 		project = ProjectBuilder.builder().build()
 		ext = new ReleaseExtension()
 		scmProvider = new GitScmProvider(localRepoDir, project.logger, ext)
+	}
+	
+	def cleanup() {
+		scmProvider.close()
 	}
 
 	def 'switchToBranch: switched branch'() {

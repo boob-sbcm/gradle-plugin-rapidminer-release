@@ -89,7 +89,7 @@ class ReleaseHelper {
 		if(System.console()) {
 			System.console().out.write(message + LINE_SEP)
 		} else {
-			println message
+			System.out.println message
 		}
 	}
 

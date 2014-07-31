@@ -64,6 +64,14 @@ abstract class GitSpecification extends Specification {
 		grgitLocal = Grgit.clone(dir: localRepoDir, uri: remoteRepoDir)
 	}
 
+	/*
+	 * Use Spock's cleanup() hock to close Grgit instances 
+	 */
+	def cleanup() {
+		grgitRemote.close()
+		grgitLocal.close()
+	}
+	
 	protected void addContent(RepoType type, String fileName) {
 		String path = remoteRepoDir.absolutePath
 		if(type == RepoType.LOCAL) {

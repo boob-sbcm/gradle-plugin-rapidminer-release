@@ -60,16 +60,16 @@ class ReleasePlugin implements Plugin<Project> {
 
 		// Create and configure dependency check task
 		def IllegalDependenciesCheck checkIllegalDeps = project.tasks.create(name: CHECK_FOR_ILLEGAL_DEPENDENCIES_NAME, type: IllegalDependenciesCheck){
-			description = 'Ensures that no illegal release dependency is referenced ' +
-					'by the project.'
+			description = '''Ensures that no illegal release dependency is referenced 
+							 by the project.'''
 			group = TASK_GROUP
 		}
 
 		// Create and configure release preparation task
 		def PrepareRelease prepareReleaseTask = project.tasks.create(name: PREPARE_RELEASE_TASK_NAME, type: PrepareRelease){
-			description = 'Prepares the project for a release. It performes some initial checks, ' +
-					'asks the user for the new release version and merges the current ' +
-					'branch to the defined master branch.'
+			description = '''Prepares the project for a release. It performs some initial checks,
+							 asks the user for the new release version and merges the current
+							 branch to the defined master branch.'''
 			group = TASK_GROUP
 		}
 		prepareReleaseTask.releaseBranch = releaseBranch
@@ -132,7 +132,7 @@ class ReleasePlugin implements Plugin<Project> {
 		def releaseTasksDependencies = [releaseCheckTask]
 
 		def withReleasePrepare = true
-		
+
 		// Check if the user has specified to omit prepareRelease task
 		if(project.hasProperty(ReleaseHelper.PROPERTY_RELEASE_PREPARE)) {
 			withReleasePrepare = Boolean.valueOf(project.properties[ReleaseHelper.PROPERTY_RELEASE_PREPARE])

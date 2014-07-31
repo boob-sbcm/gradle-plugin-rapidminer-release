@@ -192,4 +192,11 @@ class GitScmProvider {
 			throw new GradleException("Error executing Git command!", ex)
 		}
 	}
+	
+	/**
+	 * Releases file handles of the current repository.
+	 */
+	public void close() {
+		repo?.close()
+	}
 }
