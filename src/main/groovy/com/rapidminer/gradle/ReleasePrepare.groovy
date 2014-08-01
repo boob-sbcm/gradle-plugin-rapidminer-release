@@ -27,7 +27,7 @@ import org.gradle.api.tasks.TaskAction
  * @author Nils Woehler
  *
  */
-class PrepareRelease extends DefaultTask {
+class ReleasePrepare extends DefaultTask {
 
 	def GitScmProvider scmProvider
 	def String releaseBranch

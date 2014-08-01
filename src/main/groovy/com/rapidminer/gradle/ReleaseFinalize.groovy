@@ -27,7 +27,7 @@ import org.ajoberstar.grgit.*
  * @author Nils Woehler
  *
  */
-class FinalizeRelease extends DefaultTask {
+class ReleaseFinalize extends DefaultTask {
 
 	protected static final String DEVELOP = "develop"
 

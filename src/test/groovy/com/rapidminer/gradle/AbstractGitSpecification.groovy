@@ -30,7 +30,7 @@ import com.energizedwork.spock.extensions.TempDirectory
  * @author Nils Woehler
  *
  */
-abstract class GitSpecification extends Specification {
+abstract class AbstractGitSpecification extends Specification {
 
 	protected static final String FILE_1 = '1.txt'
 	protected static final String FILE_2 = '2.txt'

@@ -25,7 +25,7 @@ import org.gradle.testfixtures.ProjectBuilder
  * @author Nils Woehler
  *
  */
-class ReleasePluginTest extends GitSpecification {
+class BasicReleasePluginTest extends AbstractGitSpecification {
 
 	Project project
 

@@ -28,7 +28,7 @@ import org.gradle.api.tasks.TaskAction
  * @author Nils Woehler
  *
  */
-class RefreshMavenArtifacts extends DefaultTask {
+class ReleaseRefreshArtifacts extends DefaultTask {
 
 	String releaseRepoUrl
 	String snapshotRepoUrl

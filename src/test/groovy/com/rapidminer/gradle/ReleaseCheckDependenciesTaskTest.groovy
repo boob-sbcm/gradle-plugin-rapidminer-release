@@ -22,26 +22,15 @@ import org.ajoberstar.grgit.Grgit
 import org.gradle.api.GradleException
 
 /**
- * A integration test specification for the {@link ReleaseCheck} class
+ * An integration test specification for the {@link ReleaseCheckDependencies} class
  * and the 'releaseCheckDependencies' task.
  * 
  * @author Nils Woehler
  *
  */
-class ReleaseCheckDependenciesTest extends IntegrationSpec {
-	
-	/*
-	 * Use Spock's setup() hook to initialize a Gir repository for each test.
-	 */
-	def setup() {
-		// Initialize Git repository
-		Grgit grgit = Grgit.init(dir: projectDir)
-		grgit.close()
-		
-		buildFile << "apply plugin: 'rapidminer-release'"
-	}
+class ReleaseCheckDependenciesTaskTest extends AbstractReleaseTaskSpecification {
 
-	def 'run releaseCheckDependencies task'() {
+	def 'run releaseCheckDependencies task without dependencies'() {
 		when:
 		ExecutionResult result = runTasks('releaseCheckDependencies')
 		

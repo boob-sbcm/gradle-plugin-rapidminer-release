@@ -20,7 +20,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 
-import com.rapidminer.gradle.GitSpecification.RepoType
+import com.rapidminer.gradle.AbstractGitSpecification.RepoType
 
 /**
  * A test specification for the {@link GitScmProvider} class.
@@ -28,7 +28,7 @@ import com.rapidminer.gradle.GitSpecification.RepoType
  * @author Nils Woehler
  *
  */
-class GitScmProviderTest extends GitSpecification {
+class GitScmProviderTest extends AbstractGitSpecification {
 
 	Project project
 	ReleaseExtension ext

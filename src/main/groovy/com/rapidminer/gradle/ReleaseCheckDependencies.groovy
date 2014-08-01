@@ -26,7 +26,7 @@ import org.gradle.api.tasks.TaskAction
  * @author Nils Woehler
  *
  */
-class IllegalDependenciesCheck extends DefaultTask {
+class ReleaseCheckDependencies extends DefaultTask {
 
 	/**
 	 * Checks whether the project specifies any snapshot dependencies.

@@ -59,14 +59,14 @@ class ReleasePlugin implements Plugin<Project> {
 	def addPrepareTasks(Project project, ReleaseExtension extension) {
 
 		// Create and configure dependency check task
-		def IllegalDependenciesCheck checkIllegalDeps = project.tasks.create(name: CHECK_FOR_ILLEGAL_DEPENDENCIES_NAME, type: IllegalDependenciesCheck){
+		def ReleaseCheckDependencies checkIllegalDeps = project.tasks.create(name: CHECK_FOR_ILLEGAL_DEPENDENCIES_NAME, type: ReleaseCheckDependencies){
 			description = '''Ensures that no illegal release dependency is referenced 
 							 by the project.'''
 			group = TASK_GROUP
 		}
 
 		// Create and configure release preparation task
-		def PrepareRelease prepareReleaseTask = project.tasks.create(name: PREPARE_RELEASE_TASK_NAME, type: PrepareRelease){
+		def ReleasePrepare prepareReleaseTask = project.tasks.create(name: PREPARE_RELEASE_TASK_NAME, type: ReleasePrepare){
 			description = '''Prepares the project for a release. It performs some initial checks,
 							 asks the user for the new release version and merges the current
 							 branch to the defined master branch.'''
@@ -83,7 +83,7 @@ class ReleasePlugin implements Plugin<Project> {
 		}
 
 		// Create and configure Maven artifact refresh task
-		def RefreshMavenArtifacts refreshMavenArtifactsTask = project.tasks.create(name: REFRESH_ARTIFACTS_TASK_NAME, type: RefreshMavenArtifacts) {
+		def ReleaseRefreshArtifacts refreshMavenArtifactsTask = project.tasks.create(name: REFRESH_ARTIFACTS_TASK_NAME, type: ReleaseRefreshArtifacts) {
 			description = 'Ensures that the Maven publications have the correct ' +
 					'version and coordinates after \'releasePrepare\' task has ' +
 					'finished and the project version was updated dynamically.'
@@ -159,7 +159,7 @@ class ReleasePlugin implements Plugin<Project> {
 		}
 
 		// Create and configure finalize release task
-		def FinalizeRelease finalizeTask = project.tasks.create(name: FINALIZE_TASK_NAME, type: FinalizeRelease){
+		def ReleaseFinalize finalizeTask = project.tasks.create(name: FINALIZE_TASK_NAME, type: ReleaseFinalize){
 			description = 'Finalizes the release by merging changes from release ' +
 					'branch back to develop and deleting the release branch ' +
 					'(if configured). Will only be executed if \'releasePrepare\' '+
