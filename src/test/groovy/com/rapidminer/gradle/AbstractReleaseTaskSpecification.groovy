@@ -19,7 +19,7 @@ import nebula.test.IntegrationSpec
 import nebula.test.functional.ExecutionResult
 
 import org.ajoberstar.grgit.Grgit
-import org.gradle.api.GradleException
+import org.gradle.api.logging.LogLevel
 
 /**
  * An abstract integration test specification for all tasks of the
