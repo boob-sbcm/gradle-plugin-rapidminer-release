@@ -37,26 +37,26 @@ class ReleaseHelper {
 	/**
 	 * If set the release version will be inferred from this property rather than from gradle.properties.
 	 */
-	protected static final String PROPERTY_RELEASE_VERSION = 'release.version'
+	protected static final String PROPERTY_RELEASE_VERSION = 'releaseVersion'
 
 	/**
 	 * Allows to define whether 'releasePrepare' should ask for user feedback. If set to <code>false</code>
 	 * the version defined in 'gradle.properties' or defined via 'release.version' project
 	 * property will be used as release version and no sanity check will be done.
 	 */
-	protected static final String PROPERTY_RELEASE_INTERACTIVE = 'release.interactive'
+	protected static final String PROPERTY_RELEASE_INTERACTIVE = 'interactiveRelease'
 
 	/**
 	 * Allows to define whether 'release' should depend on 'releasePrepare'. Useful for CI server environments
 	 * where the CI server should do as less as possible.
 	 */
-	protected static final String PROPERTY_RELEASE_PREPARE = 'release.prepare'
+	protected static final String PROPERTY_RELEASE_PREPARE = 'prepareRelease'
 
 	/**
 	 * Allows to define whether 'release' should be finalized by 'releaseFinalize'. Useful for CI server environments
 	 * where the CI server should do as less as possible.
 	 */
-	protected static final String PROPERTY_RELEASE_FINALIZE = 'release.finalize'
+	protected static final String PROPERTY_RELEASE_FINALIZE = 'finalizeRelease'
 
 	/**
 	 * @return the root project's 'gradle.properties' file path

@@ -40,7 +40,7 @@ class GitScmProviderTest extends AbstractGitSpecification {
 	def setup() {
 		project = ProjectBuilder.builder().build()
 		ext = new ReleaseExtension()
-		scmProvider = new GitScmProvider(localRepoDir, project.logger, ext)
+		scmProvider = new GitScmProvider(projectDir, project.logger, ext)
 	}
 	
 	def cleanup() {
@@ -88,13 +88,13 @@ class GitScmProviderTest extends AbstractGitSpecification {
 		given:
 		ext.remote = 'origin'
 		commit(RepoType.LOCAL)
-		def localContent =  new File(localRepoDir.absolutePath, FILE_1).text
+		def localContent =  new File(projectDir.absolutePath, FILE_1).text
 		
 		when:
 		scmProvider.push(['master'] as List, false)
 		
 		then:
-		localContent ==  new File(localRepoDir.absolutePath, FILE_1).text
+		localContent ==  new File(projectDir.absolutePath, FILE_1).text
 	}
 	
 	def 'merge: all merged'() {
@@ -108,19 +108,19 @@ class GitScmProviderTest extends AbstractGitSpecification {
 		scmProvider.switchToBranch(BRANCH_1)
 		commit(RepoType.LOCAL, FILE_1)
 		commit(RepoType.LOCAL, FILE_1)
-		def contentBranch1 = new File(localRepoDir.absolutePath, FILE_1).text
+		def contentBranch1 = new File(projectDir.absolutePath, FILE_1).text
 		
 		// commit content to second branch
 		scmProvider.switchToBranch(BRANCH_2)
 		commit(RepoType.LOCAL, FILE_2)
 		commit(RepoType.LOCAL, FILE_2)
-		def contentBranch2 = new File(localRepoDir.absolutePath, FILE_2).text
+		def contentBranch2 = new File(projectDir.absolutePath, FILE_2).text
 		
 		
 		when:
 		scmProvider.merge(BRANCH_1)
-		def mergeContentBranch1 = new File(localRepoDir.absolutePath, FILE_1).text
-		def mergeContentBranch2 = new File(localRepoDir.absolutePath, FILE_2).text
+		def mergeContentBranch1 = new File(projectDir.absolutePath, FILE_1).text
+		def mergeContentBranch2 = new File(projectDir.absolutePath, FILE_2).text
 		
 		then:
 		contentBranch1 == mergeContentBranch1

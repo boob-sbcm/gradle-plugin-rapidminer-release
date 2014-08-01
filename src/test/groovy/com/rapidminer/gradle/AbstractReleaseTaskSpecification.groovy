@@ -39,6 +39,7 @@ abstract class AbstractReleaseTaskSpecification extends IntegrationSpec {
 		grgit.close()
 		
 		buildFile << "apply plugin: 'rapidminer-release'"
+		logLevel = LogLevel.INFO
 	}
 
 }

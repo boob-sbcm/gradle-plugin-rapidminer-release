@@ -15,6 +15,7 @@
  */
 package com.rapidminer.gradle
 
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -103,7 +104,7 @@ class ReleasePlugin implements Plugin<Project> {
 				project.logger.info("Adding ${checkIllegalDeps} as release preparation task dependency.")
 				prepareReleaseTask.dependsOn checkIllegalDeps
 			}
-			extension.preparationTasks.each { Task task ->
+			extension.preparationTasks.each { task ->
 				project.logger.info("Adding ${task} as release preparation task dependency.")
 				prepareReleaseTask.dependsOn task
 			}
@@ -129,7 +130,7 @@ class ReleasePlugin implements Plugin<Project> {
 		}
 
 		// Gather release task dependencies
-		def releaseTasksDependencies = [releaseCheckTask]
+		def releaseTasksDependencies = [releaseCheckTask] as List
 
 		def withReleasePrepare = true
 
@@ -148,7 +149,7 @@ class ReleasePlugin implements Plugin<Project> {
 			description = 'Releases the project by first invoking the defined release tasks '+
 					'and than creating a tag.'
 			group = TASK_GROUP
-			dependsOn releaseTasksDependencies
+			releaseTasksDependencies.each { dependsOn it }
 		}
 		releaseTask.scmProvider = gitProvider
 		releaseTask.conventionMapping.with {
@@ -186,7 +187,7 @@ class ReleasePlugin implements Plugin<Project> {
 			withReleaseFinalize = Boolean.valueOf(project.properties[ReleaseHelper.PROPERTY_RELEASE_FINALIZE])
 		}
 		if(withReleaseFinalize) {
-			project.gradle.taskGraph.whenReady {taskGraph ->
+			project.gradle.taskGraph.whenReady { taskGraph ->
 				if(taskGraph.hasTask(PREPARE_RELEASE_TASK_NAME)) {
 					releaseTask.finalizedBy finalizeTask
 				}
@@ -198,10 +199,22 @@ class ReleasePlugin implements Plugin<Project> {
 		 * configure release tasks. 
 		 */
 		project.afterEvaluate {
-			extension.releaseTasks.each { Task task ->
-				project.logger.info("Adding release task dependecy ${task.name}")
+			extension.releaseTasks.each { task ->
+				project.logger.info("Adding release task dependecy ${task}")
 				releaseTask.dependsOn task
-				task.mustRunAfter releaseTasksDependencies
+				if(task instanceof Task) {
+					releaseTasksDependencies.each { task.mustRunAfter it }
+				} else if(task instanceof String) {
+					Task t = project.tasks.findByName(task)
+					if(!t) {
+						throw new GradleException("Unknown release task with name '${task}'")
+					} else {
+						releaseTasksDependencies.each { t.mustRunAfter it }
+					}
+				} else {
+					throw new GradleException('Release task declaration is neither Task nor String!')
+				}
+
 			}
 		}
 	}

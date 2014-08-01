@@ -15,6 +15,8 @@
  */
 package com.rapidminer.gradle
 
+import nebula.test.ProjectSpec
+
 import org.ajoberstar.grgit.Grgit
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -25,27 +27,25 @@ import spock.lang.Specification
 import com.energizedwork.spock.extensions.TempDirectory
 
 /**
- * A test specification for the {@link GitScmProvider} class.
+ * An abstract test specification for all a Git backed project.
  * 
  * @author Nils Woehler
  *
  */
-abstract class AbstractGitSpecification extends Specification {
+abstract class AbstractGitSpecification extends ProjectSpec {
 
 	protected static final String FILE_1 = '1.txt'
 	protected static final String FILE_2 = '2.txt'
 	protected static final String BRANCH_1 = 'test-branch-1'
 	protected static final String BRANCH_2 = 'test-branch-2'
-	
+
 	protected enum RepoType {
 		LOCAL,
 		REMOTE
 	}
-	
-	@TempDirectory(baseDir='target/test/tmp/', clean=true)
-	File localRepoDir
+
 	Grgit grgitLocal
-	
+
 	@TempDirectory(baseDir='target/test/tmp/', clean=true)
 	File remoteRepoDir
 	Grgit grgitRemote
@@ -59,9 +59,9 @@ abstract class AbstractGitSpecification extends Specification {
 		addContent(RepoType.REMOTE, FILE_1)
 		grgitRemote.add(patterns: [FILE_1])
 		grgitRemote.commit(message: 'Initial commit')
-		
+
 		// Create local repository by cloning the remote repository
-		grgitLocal = Grgit.clone(dir: localRepoDir, uri: remoteRepoDir)
+		grgitLocal = Grgit.clone(dir: projectDir, uri: remoteRepoDir)
 	}
 
 	/*
@@ -69,21 +69,22 @@ abstract class AbstractGitSpecification extends Specification {
 	 */
 	def cleanup() {
 		grgitRemote.close()
-		grgitLocal.close()
+		projectDir.deleteOnExit()
+		projectDir.deleteDir()
 	}
-	
+
 	protected void addContent(RepoType type, String fileName) {
 		String path = remoteRepoDir.absolutePath
 		if(type == RepoType.LOCAL) {
-			path = localRepoDir.absolutePath
+			path = projectDir.absolutePath
 		}
 		new File(path, fileName) << UUID.randomUUID().toString() + File.separator
 	}
-	
+
 	protected void addContent(RepoType type) {
 		addContent(type, FILE_1)
 	}
-	
+
 	protected void commit(RepoType type, String fileName) {
 		addContent(type, fileName)
 		def Grgit grgit = grgitRemote
@@ -93,9 +94,8 @@ abstract class AbstractGitSpecification extends Specification {
 		grgit.add(patterns: [fileName])
 		grgit.commit(message: 'do')
 	}
-	
+
 	protected void commit(RepoType type) {
 		commit(type, FILE_1)
 	}
-	
 }
