@@ -27,9 +27,9 @@ import org.gradle.api.Project
  */
 class ReleaseHelper {
 
-	protected static final String GRADLE_PROPERTIES = "gradle.properties"
-	protected static final String SNAPSHOT = "-SNAPSHOT"
-	protected static final String RC = "-RC"
+	protected static final String GRADLE_PROPERTIES = 'gradle.properties'
+	protected static final String SNAPSHOT = '-SNAPSHOT'
+	protected static final String RC = '-RC'
 
 	private static final String LINE_SEP = System.getProperty('line.separator')
 	private static final String PROMPT = "${LINE_SEP}??>"
@@ -61,17 +61,17 @@ class ReleaseHelper {
 	/**
 	 * @return the root project's 'gradle.properties' file path
 	 */
-	protected static final File getGradlePropertiesFile(project) {
+	protected static final File getGradlePropertiesFile(Project project) {
 		return project.rootProject.file(GRADLE_PROPERTIES)
 	}
 
 	/**
 	 * @return the properties loaded from the root project's 'gradle.properties' file.
 	 */
-	protected static final Properties getGradleProperties(project) {
+	protected static final Properties getGradleProperties(Project project) {
 		def gradlePropFile = getGradlePropertiesFile(project)
 		if(!gradlePropFile.exists()){
-			throw new RuntimeException("Could not find 'gradle.properties' in root project!")
+			throw new GradleException("Could not find 'gradle.properties' in root project!")
 		}
 		def gradleProperties = new Properties()
 		gradlePropFile.withReader { reader ->
@@ -101,11 +101,11 @@ class ReleaseHelper {
 	 * @return User input entered or default value if user enters no data
 	 */
 	public static final String readLine(String message, String defaultValue = null) {
-		String _message = "$PROMPT $message" + (defaultValue ? " [$defaultValue] " : "")
+		message = "$PROMPT $message" + (defaultValue ? " [$defaultValue] " : "")
 		if (System.console()) {
-			return System.console().readLine(_message) ?: defaultValue
+			return System.console().readLine(message) ?: defaultValue
 		}
-		println "$_message (WAITING FOR INPUT BELOW)"
+		println "$message (WAITING FOR INPUT BELOW)"
 		return System.in.newReader().readLine() ?: defaultValue
 	}
 	
