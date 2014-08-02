@@ -29,6 +29,11 @@ import org.gradle.api.GradleException
  *
  */
 class ReleasePrepareTaskTest extends AbstractReleaseTaskSpecification {
-
+	
+	//	GitScmProvider scmProvider
+	//
+	//	def setup() {
+	//		scmProvider = new GitScmProvider(projectDir, ProjectBuilder.builder().build().logger, new ReleaseExtension())
+	//	}
 
 }

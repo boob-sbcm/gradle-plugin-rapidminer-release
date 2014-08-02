@@ -57,7 +57,7 @@ class ReleaseCheckDependenciesTaskTest extends AbstractReleaseTaskSpecification 
 		noExceptionThrown()
 	}
 	
-	def 'run releaseCheckDependecies with RC dependency'() {
+	def 'run releaseCheckDependencies with RC dependency'() {
 		given:
 		buildFile << '''
             apply plugin: 'java'
@@ -75,7 +75,7 @@ class ReleaseCheckDependenciesTaskTest extends AbstractReleaseTaskSpecification 
 		result.failure.cause.cause.message.equals('Project depends on dependencies that are forbidden in a release version!')
 	}
 	
-	def 'run releaseCheckDependecies with SNAPSHOT dependency'() {
+	def 'run releaseCheckDependencies with SNAPSHOT dependency'() {
 		given:
 		buildFile << '''
             apply plugin: 'java'

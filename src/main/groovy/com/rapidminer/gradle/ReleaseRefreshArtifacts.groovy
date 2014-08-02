@@ -16,6 +16,7 @@
 package com.rapidminer.gradle
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.publish.maven.MavenArtifact
 import org.gradle.api.publish.maven.tasks.GenerateMavenPom
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.api.tasks.TaskAction
@@ -35,39 +36,76 @@ class ReleaseRefreshArtifacts extends DefaultTask {
 
 	@TaskAction
 	def refreshArtifacts() {
+
+		// Marker needed as refreshing the version of one publish tasks
+		// also updates the version of any other publish task.
+		// This way we skip all artifacts only if version was up-to-date
+		// when invoking the task.
+		def versionChecked = false
+		def oldVersion = null
+
 		// Refresh all Maven publishing tasks
-		project.tasks.withType(PublishToMavenRepository) { publishTask ->
+		project.tasks.withType(PublishToMavenRepository) { PublishToMavenRepository publishTask ->
+
+			if(!versionChecked) {
+				if(publishTask.publication.version == project.version) {
+					project.logger.info("Skipping refresh of ${publishTask} artifacts. Version already up-to-date.")
+					return
+				} else {
+					project.logger.info("Updating publication version from ${publishTask.publication.version} to ${project.version}")
+					versionChecked = true
+					oldVersion = publishTask.publication.version
+					publishTask.publication.version = project.version
+				}
+			}
+
+			project.logger.info("Refreshing artifacts of ${publishTask}")
+
+			def snapshotURL = getSnapshotRepoUrl()
+			def releaseURL = getReleaseRepoUrl()
+
+			assert snapshotURL, 'No snapshot repository URL defined. Cannot update artifacts.'
+			assert releaseURL, 'No release repository URL defined. Cannot update artifacts.'
 
 			// First remember and remove old artifacts
 			def oldArtifacts = publishTask.publication.artifacts.toArray()
 			publishTask.publication.artifacts.clear()
 
 			// Update publish task with new artifacts with correct source
-			oldArtifacts.each({ artifact ->
-				def newPath = artifact.file.absolutePath.replaceAll(publishTask.publication.version, project.version)
+			oldArtifacts.each({ MavenArtifact artifact ->
+				project.logger.info("Updating artifact ${artifact.file}")
+				def newPath = artifact.file.absolutePath.replaceAll(oldVersion, project.version)
+				project.logger.info("New path: ${newPath}")
 				publishTask.publication.artifacts.artifact(
 						source:      	newPath,
 						classifier:  	artifact.classifier,
 						extension:  	artifact.extension
 						)
 			})
-			publishTask.publication.version = project.version
 
 			// If repository URL contains release or snapshot repository
-			def snapshotURI = new URI(getSnapshotRepoUrl())
-			def releaseURI = new URI(getReleaseRepoUrl())
+			def snapshotURI = new URI(snapshotURL)
+			def releaseURI = new URI(releaseURL)
 			if(publishTask.repository.url.equals(releaseURI) || publishTask.repository.url.equals(snapshotURI)) {
 				// adapt URL according to current version
+				def newURL = null
 				if(project.version.endsWith(ReleaseHelper.SNAPSHOT)) {
-					publishTask.repository.url = snapshotURI
+					newURL = snapshotURI
 				} else {
-					publishTask.repository.url = releaseURI
+					newURL = releaseURI
 				}
+				project.logger.info("Updating publish repository from ${publishTask.repository.url} to ${newURL}")
+				publishTask.repository.url = newURL
+			} else {
+				project.logger.info("Skipping repository update for repositoy with URL '${publishTask.repository.url}'")
 			}
 		}
 		// Also update POM generation tasks with current version
-		project.tasks.withType(GenerateMavenPom).each { generateMavenPomTask ->
-			generateMavenPomTask.pom.getProjectIdentity().version = project.version
+		project.tasks.withType(GenerateMavenPom).each { GenerateMavenPom generateMavenPomTask ->
+			if(generateMavenPomTask.pom.getProjectIdentity().version != project.version) {
+				project.logger.info "Updating POM from version ${generateMavenPomTask.pom.getProjectIdentity().version} to version ${project.version}"
+				generateMavenPomTask.pom.getProjectIdentity().version = project.version
+			}
 		}
 	}
 }
