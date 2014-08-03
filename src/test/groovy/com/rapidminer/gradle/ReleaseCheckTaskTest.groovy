@@ -33,7 +33,7 @@ import spock.lang.Ignore;
  */
 class ReleaseCheckTaskTest extends AbstractReleaseTaskSpecification {
 
-	def 'check not on master branch'() {
+	def 'check error when not on master branch'() {
 		given:
 		scmProvider.switchToBranch('develop')
 
