@@ -30,16 +30,22 @@ import org.gradle.api.logging.LogLevel
  */
 abstract class AbstractReleaseTaskSpecification extends IntegrationSpec {
 	
+	Grgit repo
+	
 	/*
 	 * Use Spock's setup() hook to initialize a Git repository for each test.
 	 */
 	def setup() {
 		// Initialize Git repository
-		Grgit grgit = Grgit.init(dir: projectDir)
-		grgit.close()
+		repo = Grgit.init(dir: projectDir)
 		
 		buildFile << "apply plugin: 'rapidminer-release'"
 		logLevel = LogLevel.INFO
+	}
+	
+	def cleanup() {
+		repo.close()
+		assert(projectDir.deleteDir())
 	}
 
 }
