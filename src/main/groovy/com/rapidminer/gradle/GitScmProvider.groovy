@@ -50,7 +50,7 @@ class GitScmProvider {
 	 * @return the tracked remote branch of the current branch
 	 */
 	def getCurrentTrackingBranch() {
-		return grgit.branch.current.trackingBranch
+		return repo.branch.current.trackingBranch
 	}
 
 	/**
