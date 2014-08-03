@@ -47,10 +47,10 @@ class ReleaseFinalize extends DefaultTask {
 	def finalizeRelease() {
 
 		if(!releaseBranch) {
-			throw new GradleException('Unknown release branch.'+ 
-					' Release finalize cannot be run as standalone task!')
+			throw new GradleException('Unknown release branch.'+
+			' Release finalize cannot be run as standalone task!')
 		}
-		
+
 		/*
 		 * 1. Switch back to release branch
 		 */
@@ -66,67 +66,83 @@ class ReleaseFinalize extends DefaultTask {
 		 * 2. Increase version in 'gradle.properties' to new version 
 		 */
 		def gradleProperties = ReleaseHelper.getGradleProperties(project)
-		logger.info("Adapting version to next development cycle and committing 'gradle.properties'.")
+		logger.info "Adapting version to next development cycle and committing 'gradle.properties'."
 		gradleProperties.version = getNextVersion(gradleProperties.version)
 		gradleProperties.store(ReleaseHelper.getGradlePropertiesFile(project).newWriter(), null)
 
 		/*
 		 * 3. Add and commit changed gradle.properties
 		 */
-		scmProvider.commit("Prepare gradle.properties for next development cycle (${gradleProperties.version})", [
-			ReleaseHelper.GRADLE_PROPERTIES] as List)
+		scmProvider.commit "Prepare gradle.properties for next development cycle (${gradleProperties.version})", [
+			ReleaseHelper.GRADLE_PROPERTIES
+		]
 
 		// A list of all branches that will be pushed to remote
 		def toPush = []
 
-		// If release branch is not develop, check if changes should be merged back to develop
-		if(mergeBackToDevelop()) {
-			logger.info("Release branch wasn't 'develop' branch. Merging release branch to develop.")
-			toPush << DEVELOP
+		// If release branch is not develop ...
+		if(!isReleaseDevelop()) {
 
-			logger.info("Switching to 'develop' branch.")
-			scmProvider.switchToBranch(DEVELOP)
+			logger.info 'Release branch was not develop. Check if changes should be merged back to develop.'
 
-			logger.info("Merging '${releaseBranch}' branch to 'develop' branch.")
-			scmProvider.merge(releaseBranch)
-		} else {
-			logger.info("Will not merge back changes to develop. Either because we are on develop or because it has been disabled.")
-		}
+			// ... check if changes should be merged back to develop
+			if(isMergeToDevelop()) {
+				logger.info "Release branch wasn't 'develop' branch. Merging release branch to develop."
 
-		/*
-		 * Check if release branch should be deleted.
-		 * 
-		 * The deletion can only be done if changes should be merged back to develop
-		 * and the release branch itself is not develop.
-		 */
-		if(isDeleteReleaseBranch() && mergeBackToDevelop()) {
-			def toRemove = [releaseBranch]
-			// also delete branch on remote if available
-			if(trackingReleaseBranch) {
-				toRemove << trackingReleaseBranch.fullName
+				logger.info "Switching to 'develop' branch."
+				scmProvider.switchToBranch(DEVELOP)
+
+				logger.info "Merging changes from '${releaseBranch}' branch to 'develop' branch."
+				scmProvider.merge(releaseBranch)
+				
+				// Ensure that changes on develop will be pushed (if enabled)
+				if(scmProvider.currentTrackingBranch) {
+					toPush << DEVELOP
+				}
+				
+				// Check if release branch should be deleted
+				if(isDeleteReleaseBranch()) {
+					def toRemove = [releaseBranch]
+					// also delete branch on remote if available
+					if(trackingReleaseBranch) {
+						toRemove << trackingReleaseBranch.fullName
+					}
+					logger.info "Deleting release branches ${toRemove}."
+					scmProvider.remove(toRemove)
+				} else {
+					logger.info 'Skipping deletion of release branch as it is disabled.'
+				}
+
+			} else {
+				logger.info "Merging changes from '${releaseBranch}' back to develop is disabled."
+				// Otherwise push it to the configured remote repository
+				if(trackingReleaseBranch) {
+					toPush << releaseBranch
+				}
 			}
-			logger.info("Deleting release branches ${toRemove}.")
-			scmProvider.remove(toRemove)
+	
 		} else {
-			// release branch should not be deleted and might even be develop -> push it to remote
-			toPush << releaseBranch
+			logger.info 'Release was made from develop. No need to merge changes back.'
+			if(scmProvider.currentTrackingBranch) {
+				toPush << DEVELOP
+			}
 		}
 
 		/*
-		 * Push changes to remote
+		 * Push changes to remote if any available
 		 */
-		if(isPushToRemote()) {
+		if(isPushToRemote() && toPush) {
 			logger.info("Pushing following branches to remote: ${toPush}")
 			scmProvider.push(toPush, false)
-		}
+		} 
 
 	}
 
 	/**
-	 * @return <code>true</code> if release branch is not develop and {@link #mergeBackToDevelop()} was set to true.
+	 * @return checks whether the release branch was develop
 	 */
-	def boolean mergeBackToDevelop() {
-		return !DEVELOP.equals(releaseBranch) && isMergeToDevelop()
+	def boolean isReleaseDevelop() {
+		return DEVELOP.equals(releaseBranch)
 	}
 
 	/**
