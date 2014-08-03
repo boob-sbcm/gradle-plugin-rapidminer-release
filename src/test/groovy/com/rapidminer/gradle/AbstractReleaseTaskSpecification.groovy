@@ -33,6 +33,7 @@ abstract class AbstractReleaseTaskSpecification extends IntegrationSpec {
 
 	Grgit repo
 	GitScmProvider scmProvider
+	File propertiesFile
 
 	/*
 	 * Use Spock's setup() hook to initialize a Git repository for each test.
@@ -51,14 +52,14 @@ abstract class AbstractReleaseTaskSpecification extends IntegrationSpec {
 			settings.gradle
 			.gradle-test-kit/
 		'''
-		def properties = createFile('gradle.properties')
-		properties << '''
+		propertiesFile = createFile('gradle.properties')
+		propertiesFile << '''
 			version = 1.0.0
 		'''
 		repo.add(patterns: [
 			buildFile.name,
 			gitignore.name,
-			properties.name
+			propertiesFile.name
 		])
 		repo.commit(message: 'Initial commit')
 		repo.checkout(branch: 'develop', createBranch: true)
