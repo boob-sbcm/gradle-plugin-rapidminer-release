@@ -30,6 +30,7 @@ import org.gradle.api.tasks.TaskAction
 class ReleasePrepare extends DefaultTask {
 
 	def GitScmProvider scmProvider
+	def Random random = new Random()
 
 	// Variables below will be defined by the conventionalMapping
 	def String masterBranch
@@ -38,11 +39,11 @@ class ReleasePrepare extends DefaultTask {
 
 	@TaskAction
 	def prepareRelease() {
-		
+
 		// Assume current branch to be release branch
 		def String releaseBranch = scmProvider.currentBranch
-		
-		
+
+
 		/*
 		 * 1. Ensure we are not on master branch 
 		 */
@@ -78,7 +79,7 @@ class ReleasePrepare extends DefaultTask {
 
 		// perform a version format check
 		if(!(releaseVersion ==~ /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/)) {
-			throw new GradleException("Release version is of wrong format. Correct format example: '1.0.003'.")
+			throw new GradleException('Release version is of wrong format. Correct format example: \'1.0.003\'.')
 		}
 
 		logger.info("Current branch is: ${releaseBranch}")
@@ -118,27 +119,21 @@ class ReleasePrepare extends DefaultTask {
 		scmProvider.switchToBranch(getMasterBranch())
 
 		/*
-		 * 8. Ensuring there aren't any commits in the upstream branch that haven't been merged yet.
-		 */
-		scmProvider.ensureNoUpstreamChanges()
-		
-		/*
-		 * 8a. Ensure the current version isn't already tagged
-		 */
-		scmProvider.ensureNoTag(ReleaseHelper.execClosure(project.version, getGenerateTagName()))
-
-		/*
-		 * 9. Merge release branch into 'master'
+		 * 8. Merge release branch into 'master'
 		 */
 		scmProvider.merge(releaseBranch)
 
 		/*
-		 * 10. Push changes to remote repository
+		 * 9. Push changes to remote repository
 		 */
-		if(isPushToRemote()) {
-			scmProvider.push([getMasterBranch()] as List, false)
+		if(scmProvider.currentTrackingBranch) {
+			if(isPushToRemote()) {
+				scmProvider.push([getMasterBranch()], false)
+			}
+		} else {
+			project.logger.info('Skip pushing of changes as master branch isn\'t tracking any remote repository')
 		}
-		
+
 		// Propagate release branch to finalize task
 		project.tasks.findByName(ReleasePlugin.FINALIZE_TASK_NAME).releaseBranch = releaseBranch
 	}
@@ -151,33 +146,33 @@ class ReleasePrepare extends DefaultTask {
 	 * @param currentVersion the current version written in gradle.properties
 	 * @return the version that will be released
 	 */
-	def String askForReleaseVersion(releaseVersion){
+	def String askForReleaseVersion(String releaseVersion){
 		ReleaseHelper.println "Next release version is: ${releaseVersion}"
 
 		// ask for new version number
 		def correctInput = false
 		def iterations = 0
 		while(!correctInput) {
-			def changeVersion = ReleaseHelper.readLine("Is release version '${releaseVersion}' correct?", "yes")
-			if(changeVersion){
-				if(changeVersion.toLowerCase().startsWith("n")){
-					while(!correctInput){
-						releaseVersion = ReleaseHelper.readLine('Please enter new release version: ')
-
-						// check whether specified version is a valid version number
-						correctInput = (releaseVersion ==~ /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/)
-						if(!correctInput){
-							ReleaseHelper.println "Invalid release version number: '${releaseVersion}'. A version must contain a major version (up to three digits), a minor version (up to three digits), and a patch level (up to three digits) separated by dots (e.g. 1.0.003)."
-						}
-					}
-				} else if(!changeVersion.toLowerCase().startsWith("y")){
-					ReleaseHelper.println "Undefined input. Please type 'yes' or 'no'!"
-				} else {
-					correctInput = true
-				}
+			def changeVersion = ReleaseHelper.readLine("Is release version '${releaseVersion}' correct?", 'yes')
+			project.logger.info('Received input: ' + changeVersion)
+			if(changeVersion.toLowerCase().startsWith("n")) {
+				return askForUpdatedReleaseVersion()
+			} else if(!changeVersion.toLowerCase().startsWith("y")){
+				ReleaseHelper.println "Undefined input. Please type 'yes' or 'no'!"
 			} else {
 				correctInput = true
 			}
+		}
+		return releaseVersion
+	}
+
+	def askForUpdatedReleaseVersion() {
+		def releaseVersion =  ReleaseHelper.readLine('Please enter new release version: ')
+		project.logger.info('Received release version input: ' + releaseVersion)
+
+		// check whether specified version is a valid version number
+		if(!(releaseVersion ==~ /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/)){
+			throw new GradleException("Invalid release version number: '${releaseVersion}'. A version must contain a major version (up to three digits), a minor version (up to three digits), and a patch level (up to three digits) separated by dots (e.g. 1.0.003).")
 		}
 		return releaseVersion
 	}
@@ -201,11 +196,11 @@ class ReleasePrepare extends DefaultTask {
 
 		def i = 0
 		while(i++ <= 2){
-			Random random = new Random()
 			int a = random.nextInt(10) + 1
 			int b = random.nextInt(10) + 1
 			def correctResult = a + b
 			def result = ReleaseHelper.readLine("Please acknowledge: ${a} + ${b} = ")
+			project.logger.info('Received result: ' + result)
 			try {
 				if(result.toInteger() != correctResult) {
 					ReleaseHelper.println "Wrong result (${a} + ${b} = ${correctResult})! Please try again..."
