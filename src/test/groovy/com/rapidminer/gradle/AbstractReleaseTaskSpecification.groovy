@@ -20,6 +20,7 @@ import nebula.test.functional.ExecutionResult
 
 import org.ajoberstar.grgit.Grgit
 import org.gradle.api.logging.LogLevel
+import org.gradle.testfixtures.ProjectBuilder
 
 /**
  * An abstract integration test specification for all tasks of the
@@ -29,23 +30,43 @@ import org.gradle.api.logging.LogLevel
  *
  */
 abstract class AbstractReleaseTaskSpecification extends IntegrationSpec {
-	
+
 	Grgit repo
-	
+	GitScmProvider scmProvider
+
 	/*
 	 * Use Spock's setup() hook to initialize a Git repository for each test.
 	 */
 	def setup() {
 		// Initialize Git repository
 		repo = Grgit.init(dir: projectDir)
-		
+
 		buildFile << "apply plugin: 'rapidminer-release'"
 		logLevel = LogLevel.INFO
+
+		scmProvider = new GitScmProvider(projectDir,
+				ProjectBuilder.builder().build().logger, new ReleaseExtension())
+		def gitignore = createFile('.gitignore')
+		gitignore << '''
+			settings.gradle
+			.gradle-test-kit/
+		'''
+		def properties = createFile('gradle.properties')
+		properties << '''
+			version = 1.0.0
+		'''
+		repo.add(patterns: [
+			buildFile.name,
+			gitignore.name,
+			properties.name
+		])
+		repo.commit(message: 'Initial commit')
+		repo.checkout(branch: 'develop', createBranch: true)
+		repo.checkout(branch: 'master', createBranch: false)
 	}
-	
+
 	def cleanup() {
 		repo.close()
 		assert(projectDir.deleteDir())
 	}
-
 }

@@ -30,10 +30,12 @@ import org.gradle.api.GradleException
  */
 class ReleasePrepareTaskTest extends AbstractReleaseTaskSpecification {
 	
-	//	GitScmProvider scmProvider
-	//
-	//	def setup() {
-	//		scmProvider = new GitScmProvider(projectDir, ProjectBuilder.builder().build().logger, new ReleaseExtension())
-	//	}
+	def 'check error on master branch'() {
+		when:
+		ExecutionResult result = runTasksWithFailure('releasePrepare')
+
+		then:
+		result.failure.cause.cause.message == 'Cannot prepare release. Release branch is master branch \'master\'!'
+	}
 
 }

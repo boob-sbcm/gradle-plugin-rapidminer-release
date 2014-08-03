@@ -33,30 +33,6 @@ import spock.lang.Ignore;
  */
 class ReleaseCheckTaskTest extends AbstractReleaseTaskSpecification {
 
-	GitScmProvider scmProvider
-
-	def setup() {
-		scmProvider = new GitScmProvider(projectDir,
-				ProjectBuilder.builder().build().logger, new ReleaseExtension())
-		def gitignore = createFile('.gitignore')
-		gitignore << '''
-			settings.gradle
-			.gradle-test-kit/
-		'''
-		def properties = createFile('gradle.properties')
-		properties << '''
-			version = 1.0.0
-		'''
-		repo.add(patterns: [
-			buildFile.name,
-			gitignore.name,
-			properties.name
-		])
-		repo.commit(message: 'Initial commit')
-		repo.checkout(branch: 'develop', createBranch: true)
-		repo.checkout(branch: 'master', createBranch: false)
-	}
-
 	def 'check not on master branch'() {
 		given:
 		scmProvider.switchToBranch('develop')
