@@ -38,7 +38,6 @@ class ReleasePlugin implements Plugin<Project> {
 
 	protected Project project
 	protected GitScmProvider gitProvider
-	protected String releaseBranch
 
 	@Override
 	void apply(Project project) {
@@ -47,7 +46,6 @@ class ReleasePlugin implements Plugin<Project> {
 		ReleaseExtension extension = project.extensions.create('release', ReleaseExtension)
 
 		this.gitProvider = new GitScmProvider(project.file('.'), project.logger, extension)
-		this.releaseBranch = gitProvider.currentBranch
 
 		addPrepareTasks(project, extension)
 		addReleaseTasks(project, extension)
@@ -73,7 +71,6 @@ class ReleasePlugin implements Plugin<Project> {
 							 branch to the defined master branch.'''
 			group = TASK_GROUP
 		}
-		prepareReleaseTask.releaseBranch = releaseBranch
 		prepareReleaseTask.scmProvider = gitProvider
 
 		// Use conventionMapping for lazy initialization of task variables
@@ -167,7 +164,6 @@ class ReleasePlugin implements Plugin<Project> {
 					'was executed beforehand.'
 			group = TASK_GROUP
 		}
-		finalizeTask.releaseBranch = releaseBranch
 		finalizeTask.scmProvider = gitProvider
 
 		// use conventionMapping for lazy initialization of variables

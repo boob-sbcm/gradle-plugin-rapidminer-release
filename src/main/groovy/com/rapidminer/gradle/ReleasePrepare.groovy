@@ -30,7 +30,6 @@ import org.gradle.api.tasks.TaskAction
 class ReleasePrepare extends DefaultTask {
 
 	def GitScmProvider scmProvider
-	def String releaseBranch
 
 	// Variables below will be defined by the conventionalMapping
 	def String masterBranch
@@ -39,12 +38,16 @@ class ReleasePrepare extends DefaultTask {
 
 	@TaskAction
 	def prepareRelease() {
-
+		
+		// Assume current branch to be release branch
+		def String releaseBranch = scmProvider.currentBranch
+		
+		
 		/*
 		 * 1. Ensure we are not on master branch 
 		 */
 		if(releaseBranch.equals(getMasterBranch())){
-			throw new GradleException("Cannot prepare release. Release branch is master branch '${getMasterBranch()}'!.")
+			throw new GradleException("Cannot prepare release. Release branch is master branch '${getMasterBranch()}'!")
 		}
 
 		/*
@@ -135,6 +138,9 @@ class ReleasePrepare extends DefaultTask {
 		if(isPushToRemote()) {
 			scmProvider.push([getMasterBranch()] as List, false)
 		}
+		
+		// Propagate release branch to finalize task
+		project.tasks.findByName(ReleasePlugin.FINALIZE_TASK_NAME).releaseBranch = releaseBranch
 	}
 
 	/**

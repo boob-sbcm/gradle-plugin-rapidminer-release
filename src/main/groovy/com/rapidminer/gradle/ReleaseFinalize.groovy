@@ -16,6 +16,7 @@
 package com.rapidminer.gradle
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.ajoberstar.grgit.*
 
@@ -45,6 +46,11 @@ class ReleaseFinalize extends DefaultTask {
 	@TaskAction
 	def finalizeRelease() {
 
+		if(!releaseBranch) {
+			throw new GradleException('Unknown release branch.'+ 
+					' Release finalize cannot be run as standalone task!')
+		}
+		
 		/*
 		 * 1. Switch back to release branch
 		 */
