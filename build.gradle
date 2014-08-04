@@ -7,11 +7,9 @@ gradlePlugin { id 'release' }
 // ensure that each Jenkins build sees updated test results (fails otherwise)
 tasks.create(name: 'updateTestTimestamps') << {
 	def timestamp = System.currentTimeMillis()
-	test.outputs.files.each { result ->
-		println result
-		println result.class
-		new File(result).eachFile { File f ->
-			println f
+	test.outputs.files.each { File output ->
+		println output.isDirectory()
+		output.eachFile { File f ->
 			f.lastModified = timestamp
 		}
 	}
