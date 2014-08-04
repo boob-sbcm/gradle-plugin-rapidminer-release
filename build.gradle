@@ -6,6 +6,18 @@ apply plugin: 'rapidminer-gradle-plugin'
 
 gradlePlugin { id 'release' }
 
+// ensure that each Jenkins build sees updated test results (fails otherwise)
+tasks.create(name: 'updateTestTimestamps') {
+	inputs.files test.outputs.files
+	doLast{
+		def timestamp = System.currentTimeMillis()
+		if(test.hasProperty('testResultsDir')){
+			test.testResultsDir?.eachFile { it.lastModified = timestamp }
+		}
+	}
+}
+check.dependsOn(updateTestTimestamps)
+
 dependencies {
 	// Grgit (https://github.com/ajoberstar/grgit)
 	// Used for Git interaction
