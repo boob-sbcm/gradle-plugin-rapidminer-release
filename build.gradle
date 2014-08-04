@@ -8,7 +8,6 @@ gradlePlugin { id 'release' }
 tasks.create(name: 'updateTestTimestamps') << {
 	def timestamp = System.currentTimeMillis()
 	test.outputs.files.each { File output ->
-		println output.isDirectory()
 		output.eachFile { File f ->
 			f.lastModified = timestamp
 		}
