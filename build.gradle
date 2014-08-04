@@ -1,23 +1,15 @@
-buildscript {
-	dependencies { classpath 'com.rapidminer.gradle:gradle-plugin:0.2.3' }
-}
+buildscript { dependencies { classpath 'com.rapidminer.gradle:gradle-plugin:0.2.3' } }
 
 apply plugin: 'rapidminer-gradle-plugin'
 
 gradlePlugin { id 'release' }
 
 // ensure that each Jenkins build sees updated test results (fails otherwise)
-tasks.create(name: 'updateTestTimestamps') {
-	inputs.files test.outputs.files
-	doLast{
-		def timestamp = System.currentTimeMillis()
-		test.outputs.files.each { 
-			println it
-		}
-		if(test.hasProperty('testResultsDir')){
-			println test.testResultsDir
-			test.testResultsDir?.eachFile { it.lastModified = timestamp }
-		}
+tasks.create(name: 'updateTestTimestamps') << {
+	def timestamp = System.currentTimeMillis()
+	test.outputs.files.eachFile {
+		println it
+		it.lastModified = timestamp
 	}
 }
 check.dependsOn(updateTestTimestamps)
