@@ -11,10 +11,9 @@ tasks.create(name: 'updateTestTimestamps') {
 	inputs.files test.outputs.files
 	doLast{
 		def timestamp = System.currentTimeMillis()
-		println test.testResultsDir
-		println ""
 		println test.outputs.files
 		if(test.hasProperty('testResultsDir')){
+			println test.testResultsDir
 			test.testResultsDir?.eachFile { it.lastModified = timestamp }
 		}
 	}
