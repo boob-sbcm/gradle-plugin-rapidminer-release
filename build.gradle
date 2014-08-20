@@ -1,4 +1,4 @@
-buildscript { dependencies { classpath 'com.rapidminer.gradle:gradle-plugin:0.1.2' } }
+buildscript { dependencies { classpath 'com.rapidminer.gradle:gradle-plugin:0.2.5' } }
 
 apply plugin: 'rapidminer-gradle-plugin'
 
