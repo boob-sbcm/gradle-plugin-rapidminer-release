@@ -21,7 +21,7 @@ A more detailed description is given below (see 'Added Tasks')
 
 ## How to use (requires Gradle 2.1+)
 	plugins {
-		id 'com.rapidminer.release' version «plugin version»
+		id 'com.rapidminer.release' version ?plugin version?
 	}
 	 
 	release {
